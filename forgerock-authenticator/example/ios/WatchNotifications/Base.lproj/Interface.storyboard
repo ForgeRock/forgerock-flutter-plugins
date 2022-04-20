@@ -1,0 +1,194 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document type="com.apple.InterfaceBuilder.WatchKit.Storyboard" version="3.0" toolsVersion="19529" targetRuntime="watchKit" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES" initialViewController="AgC-eL-Hgc">
+    <device id="watch38"/>
+    <dependencies>
+        <deployment identifier="watchOS"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="19519"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBWatchKitPlugin" version="19514"/>
+    </dependencies>
+    <scenes>
+        <!--InterfaceController-->
+        <scene sceneID="aou-V4-d1y">
+            <objects>
+                <controller identifier="InterfaceController" id="AgC-eL-Hgc" customClass="InterfaceController" customModule="WatchNotifications" customModuleProvider="target">
+                    <items>
+                        <group width="1" alignment="left" id="jqu-8h-OvQ">
+                            <items>
+                                <imageView width="38" height="38" alignment="left" image="Logo" contentMode="scaleAspectFill" id="Da5-Eu-4L2"/>
+                                <group width="1" alignment="left" layout="vertical" spacing="0.0" id="HEd-Lz-KRq">
+                                    <items>
+                                        <label alignment="left" text="ForgeRock" textAlignment="left" id="h7p-Kh-ASF">
+                                            <fontDescription key="font" style="UICTFontTextStyleHeadline"/>
+                                        </label>
+                                        <label alignment="left" text="Authenticator" textAlignment="left" id="Y8s-QM-sIS">
+                                            <fontDescription key="font" style="UICTFontTextStyleCaption2"/>
+                                        </label>
+                                    </items>
+                                    <edgeInsets key="margins" left="0.0" right="0.0" top="0.0" bottom="0.0"/>
+                                </group>
+                            </items>
+                            <edgeInsets key="margins" left="0.0" right="0.0" top="0.0" bottom="0.0"/>
+                        </group>
+                        <separator alignment="left" alpha="0.0" id="Rfz-tt-yYn"/>
+                        <label alignment="left" text="You can approve authentication requests from this Watch app for registered Push accounts." numberOfLines="7" id="KKd-Xp-3kZ">
+                            <fontDescription key="font" style="UICTFontTextStyleCaption2"/>
+                        </label>
+                    </items>
+                </controller>
+            </objects>
+            <point key="canvasLocation" x="68" y="46"/>
+        </scene>
+        <!--ForgeRock-->
+        <scene sceneID="qeu-f0-MKp">
+            <objects>
+                <controller identifier="LoadingController" title="ForgeRock" fullScreen="YES" id="oVr-Gd-6WX" customClass="LoadingController" customModule="WatchNotifications_Extension">
+                    <items>
+                        <spriteKitScene height="121" alignment="center" id="lwW-te-lH3"/>
+                        <separator alignment="left" alpha="0.0" id="1ep-Ce-b7i"/>
+                        <button width="1" alignment="left" title="Dismiss" id="DvH-lm-70F">
+                            <connections>
+                                <action selector="backToMainView" destination="oVr-Gd-6WX" id="UcL-B0-0Oe"/>
+                            </connections>
+                        </button>
+                    </items>
+                </controller>
+            </objects>
+            <point key="canvasLocation" x="474" y="-85"/>
+        </scene>
+        <!--ForgeRock-->
+        <scene sceneID="xt1-jP-ajC">
+            <objects>
+                <controller identifier="ResultController" title="ForgeRock" id="phb-60-bgx" customClass="ResultController" customModule="WatchNotifications_Extension">
+                    <items>
+                        <imageView width="53" height="46" alignment="center" image="person.crop.circle.badge.exclamationmark" catalog="system" id="nkV-JS-YHt">
+                            <color key="tintColor" red="0.011764705882352941" green="0.16862745098039217" blue="0.45882352941176469" alpha="0.84705882349999995" colorSpace="calibratedRGB"/>
+                        </imageView>
+                        <label width="136" alignment="center" text="Authentication request sucessfully processed." textAlignment="center" numberOfLines="5" id="pWm-Hh-SB6">
+                            <fontDescription key="font" style="UICTFontTextStyleCaption2"/>
+                        </label>
+                        <separator alignment="left" alpha="0.0" id="Amf-Se-ud9"/>
+                        <button width="1" alignment="left" title="Dismiss" id="qWP-xP-s3n">
+                            <connections>
+                                <action selector="backToMainView" destination="phb-60-bgx" id="8Jm-2j-mUz"/>
+                            </connections>
+                        </button>
+                    </items>
+                    <connections>
+                        <outlet property="dismissButton" destination="qWP-xP-s3n" id="zWW-Vz-s4E"/>
+                        <outlet property="messageImage" destination="nkV-JS-YHt" id="hx1-BE-qEO"/>
+                        <outlet property="messageLabel" destination="pWm-Hh-SB6" id="Xka-Gy-tOg"/>
+                    </connections>
+                </controller>
+            </objects>
+            <point key="canvasLocation" x="744" y="1"/>
+        </scene>
+        <!--ForgeRock-->
+        <scene sceneID="7dN-aP-EgS">
+            <objects>
+                <controller identifier="HandleNotificationController" title="ForgeRock" id="zAM-mg-VD4" customClass="HandleNotificationController" customModule="WatchNotifications_Extension">
+                    <items>
+                        <imageView width="50" height="45" alignment="center" image="lock.circle" catalog="system" id="u3a-Fx-akX">
+                            <color key="tintColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                        </imageView>
+                        <separator alignment="left" alpha="0.0" id="OZh-4J-M0h"/>
+                        <label width="136" alignment="center" text="Authorize Login Request?" textAlignment="center" numberOfLines="4" id="svd-A6-TEs">
+                            <fontDescription key="font" style="UICTFontTextStyleCaption2"/>
+                        </label>
+                        <separator alignment="left" alpha="0.0" id="D9q-vl-rj2"/>
+                        <button width="1" alignment="left" title="Accept" id="iAX-7A-AiC">
+                            <color key="backgroundColor" red="0.011764705882352941" green="0.16862745098039217" blue="0.45882352941176469" alpha="0.84705882349999995" colorSpace="calibratedRGB"/>
+                            <connections>
+                                <action selector="accept" destination="zAM-mg-VD4" id="FYd-XY-kbc"/>
+                            </connections>
+                        </button>
+                        <button width="1" alignment="left" title="Reject" id="kEO-pk-3P8">
+                            <color key="backgroundColor" white="0.33333333333333331" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                            <connections>
+                                <action selector="reject" destination="zAM-mg-VD4" id="Kz0-ei-6Uv"/>
+                            </connections>
+                        </button>
+                    </items>
+                    <connections>
+                        <outlet property="acceptButton" destination="iAX-7A-AiC" id="SNI-sj-vim"/>
+                        <outlet property="iconImage" destination="u3a-Fx-akX" id="AFk-GJ-673"/>
+                        <outlet property="messageLabel" destination="svd-A6-TEs" id="wnP-gw-RMT"/>
+                        <outlet property="progressScene" destination="lwW-te-lH3" id="QGl-7L-vDp"/>
+                        <outlet property="rejectButton" destination="kEO-pk-3P8" id="cUe-oM-ejJ"/>
+                    </connections>
+                </controller>
+            </objects>
+            <point key="canvasLocation" x="474" y="213"/>
+        </scene>
+        <!--Static Notification Interface Controller-->
+        <scene sceneID="AEw-b0-oYE">
+            <objects>
+                <notificationController id="YCC-NB-fut" customClass="HandleNotificationController">
+                    <items>
+                        <label alignment="left" text="Authentication Request" numberOfLines="2" id="IdU-wH-bcW">
+                            <color key="textColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                        </label>
+                    </items>
+                    <notificationCategory key="notificationCategory" identifier="authentication" id="JfB-70-Muf"/>
+                    <connections>
+                        <outlet property="notificationAlertLabel" destination="IdU-wH-bcW" id="JKC-fr-R95"/>
+                        <segue destination="4sK-HA-Art" kind="relationship" relationship="dynamicNotificationInterface" id="kXh-Jw-8B1"/>
+                        <segue destination="eXb-UN-Cd0" kind="relationship" relationship="dynamicInteractiveNotificationInterface" id="mpB-YA-K8N"/>
+                    </connections>
+                </notificationController>
+            </objects>
+            <point key="canvasLocation" x="77" y="669"/>
+        </scene>
+        <!--Static Notification Interface Controller-->
+        <scene sceneID="MuU-rV-mGm">
+            <objects>
+                <notificationController id="gf5-59-v01">
+                    <items>
+                        <label alignment="left" text="Authentication Request" numberOfLines="3" id="V3q-VR-XJf"/>
+                        <label width="118" height="20" alignment="left" text="Tap to log in" id="p6f-ku-x7O">
+                            <fontDescription key="font" style="UICTFontTextStyleHeadline"/>
+                        </label>
+                    </items>
+                    <notificationCategory key="notificationCategory" id="uTF-CO-AAj"/>
+                    <connections>
+                        <outlet property="notificationAlertLabel" destination="V3q-VR-XJf" id="alj-Bl-M1a"/>
+                    </connections>
+                </notificationController>
+            </objects>
+            <point key="canvasLocation" x="83" y="1118"/>
+        </scene>
+        <!--Notification Controller-->
+        <scene sceneID="ZPc-GJ-vnh">
+            <objects>
+                <controller id="4sK-HA-Art" customClass="NotificationController" customModule="WatchNotifications" customModuleProvider="target">
+                    <items>
+                        <label alignment="left" text="Authentication Request" numberOfLines="2" id="Lco-84-j6E"/>
+                    </items>
+                    <connections>
+                        <outlet property="messageLabel" destination="Lco-84-j6E" id="EZq-wW-Emm"/>
+                    </connections>
+                </controller>
+            </objects>
+            <point key="canvasLocation" x="490" y="812"/>
+        </scene>
+        <!--Notification Controller-->
+        <scene sceneID="Niz-AI-uX2">
+            <objects>
+                <controller id="eXb-UN-Cd0" customClass="NotificationController" customModule="WatchNotifications" customModuleProvider="target">
+                    <items>
+                        <label alignment="left" text="Authentication Request" numberOfLines="3" id="x6k-vR-wGT"/>
+                    </items>
+                    <connections>
+                        <outlet property="messageLabel" destination="x6k-vR-wGT" id="bso-j0-4Te"/>
+                    </connections>
+                </controller>
+            </objects>
+            <point key="canvasLocation" x="490" y="529"/>
+        </scene>
+    </scenes>
+    <color key="tintColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+    <resources>
+        <image name="Logo" width="96" height="96"/>
+        <image name="lock.circle" catalog="system" width="128" height="121"/>
+        <image name="person.crop.circle.badge.exclamationmark" catalog="system" width="128" height="112"/>
+    </resources>
+</document>
