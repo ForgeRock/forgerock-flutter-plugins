@@ -1,0 +1,30 @@
+name: forgerock_authenticator
+description: ForgeRock Authenticator plugin allows you to build the power of the official ForgeRock Authenticator application into your own Flutter app.
+version: 1.0.0
+homepage: https://www.forgerock.com
+repository: https://github.com/ForgeRock/forgerock-flutter-plugins
+issue_tracker: https://github.com/ForgeRock/forgerock-flutter-plugins/issues
+documentation: https://sdks.forgerock.com
+
+environment:
+  sdk: '>=2.12.0 <3.0.0'
+  flutter: ">=1.20.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  mockito: ^5.0.0
+
+flutter:
+  plugin:
+    platforms:
+      android:
+        package: org.forgerock.forgerock_authenticator
+        pluginClass: ForgerockAuthenticatorPlugin
+      ios:
+        pluginClass: ForgerockAuthenticatorPlugin
+

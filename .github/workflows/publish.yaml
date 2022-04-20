@@ -1,0 +1,94 @@
+name: Publish to pub.dev
+on:
+  workflow_call:
+    inputs:
+      version:
+        description: Version number
+        type: string
+        required: true
+    secrets:
+      SLACK_WEBHOOK_URL:
+        description: Slack Notifier Incoming Webhook
+        required: true
+      PUB_DEV_OAUTH_ACCESS_TOKEN:
+        description: Access token granting access to publish a release to pub.dev
+        required: true
+      PUB_DEV_OAUTH_REFRESH_TOKEN:
+        description: Refresh token for the PUB_DEV_OAUTH_ACCESS_TOKEN
+        required: true
+
+jobs:
+  publish-package:
+    runs-on: macos-latest
+    defaults:
+      run:
+        working-directory: forgerock-authenticator
+
+    steps:
+        # Clone the repo
+      - name: Clone the repository
+        uses: actions/checkout@v3
+
+      # Setup flutter and get package dependencies
+      - name: Setup flutter 2.10.1 and resolve package dependencies
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '2.10.1'
+          channel: 'stable'
+          cache: true
+          cache-key: flutter
+          cache-path: ${{ runner.tool_cache }}/flutter
+      - run: flutter pub get
+
+      # dry-run publish to pub.dev
+      - name: Test publish to pub.dev (dry-run)
+        run: flutter pub publish --dry-run
+
+      # Prepare credentials for publishing
+      - name: Prepare pub.dev credentials
+        if: success()
+        run: |
+            cat <<EOF > ${{ env.PUB_CACHE }}/credentials.json
+            {
+              "accessToken":"${{ secrets.PUB_DEV_OAUTH_ACCESS_TOKEN }}",
+              "refreshToken":"${{ secrets.PUB_DEV_OAUTH_REFRESH_TOKEN }}",
+              "tokenEndpoint": "https://accounts.google.com/o/oauth2/token",
+              "scopes":["https://www.googleapis.com/auth/userinfo.email", "openid"],
+              "expiration": 1656460804676
+            }
+            EOF
+
+      # publish to pub.dev
+      - name: Publish package to pub.dev
+        timeout-minutes: 5
+        if: success()
+        run: flutter pub publish -f
+
+      # Finally, tag the repo, and create a new release
+      - name: Tag the repo and create a new release
+        if: success()
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ inputs.version }}
+          release_name: ${{ inputs.version }} Release
+          body: ForgeRock Authenticator Plugin ${{ inputs.version }} Release
+
+      # Send slack notification with result status
+      - name: Send slack notification
+        uses: 8398a7/action-slack@v3
+        with:
+          status: custom
+          fields: all
+          custom_payload: |
+            {
+              attachments: [{
+                title: 'ForgeRock Authenticator Plugin Release',
+                color: '${{ job.status }}' === 'success' ? 'good' : '${{ job.status }}' === 'failure' ? 'danger' : 'warning',
+                text: `\nStatus: ${{ job.status }}\nWorkflow: ${process.env.AS_WORKFLOW} -> ${process.env.AS_JOB}`, 
+              }]
+            }
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+        if: always()

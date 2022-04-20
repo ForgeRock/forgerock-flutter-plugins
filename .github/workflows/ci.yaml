@@ -1,0 +1,71 @@
+name: Build and Test
+
+# Trigger on pull request
+on:
+  pull_request:
+    types: [opened, reopened, synchronize]
+    branches:
+      - master
+      - develop
+  push:
+    branches:
+      - master
+      - develop
+
+jobs:
+  build-and-test:
+    name: Build and test
+    runs-on: macos-latest
+    defaults:
+      run:
+        working-directory: forgerock-authenticator
+
+    steps:
+      - name: Clone the repository
+        uses: actions/checkout@v3
+
+      - name: Setup flutter 2.10.1 and resolve package dependencies
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '2.10.1'
+          channel: 'stable'
+          cache: true
+          cache-key: flutter
+          cache-path: ${{ runner.tool_cache }}/flutter
+      - run: flutter pub get
+
+      # run unit tests with coverage
+      - name: Run unit tests with coverage
+        if: always()
+        run: flutter test --machine --coverage > unit-test-results.json
+
+      # Publish test reports for the unit and widget tests
+      - name: Publish test results
+        uses: dorny/test-reporter@v1
+        if: success() || failure()
+        with:
+          name: Test results
+          path: '**/*test-results.json'
+          list-suites: 'all'
+          list-tests: 'all'
+          fail-on-error: 'true'
+          reporter: flutter-json
+
+      # Upload test coverage reports to Codecov
+      - name: Upload unit tests coverage report
+        uses: codecov/codecov-action@v2
+        if: success() || failure()
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: forgerock-authenticator/coverage/lcov.info
+
+      # Send slack notification with result status
+      - uses: 8398a7/action-slack@v3
+        with:
+          mention: 'stoyan.petrov,rodrigo.reis'
+          if_mention: 'failure,cancelled'
+          fields: repo,author,eventName,message,job,pullRequest,took
+          status: ${{ job.status }}
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+        if: always()

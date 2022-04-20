@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<full-backup-content>
+    <include domain="sharedpref" path="com.example.authenticator.DATA.ACCOUNT.xml"/>
+    <include domain="sharedpref" path="com.example.authenticator.DATA.MECHANISM.xml"/>
+    <include domain="sharedpref" path="com.example.authenticator.DATA.NOTIFICATION.xml"/>
+    <include domain="sharedpref" path="FlutterSharedPreferences.xml" />
+</full-backup-content>

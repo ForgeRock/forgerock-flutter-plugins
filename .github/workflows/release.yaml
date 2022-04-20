@@ -1,0 +1,38 @@
+name: Release Authenticator Plugin
+
+on: 
+  workflow_dispatch:
+    branches:
+        - master
+    inputs:
+      version:
+        description: |
+          Enter version number.
+          The version number of an official release should use the following pattern: x.x.x
+          To publish a pre-release append a suffix to the version.
+        required: true
+        type: string
+
+jobs:
+  # Check release number
+  check-release-number:
+    name: Check release number
+    uses: ./.github/workflows/check-release-version.yaml
+    secrets:
+      SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+    with: 
+      version: ${{ github.event.inputs.version }}
+
+  # Publish to pub.dev
+  publish:
+    name: Publish to pub.dev
+    uses: ./.github/workflows/publish.yaml
+    needs: check-release-number
+    secrets:
+      SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+      PUB_DEV_OAUTH_ACCESS_TOKEN: ${{ secrets.PUB_DEV_OAUTH_ACCESS_TOKEN }}
+      PUB_DEV_OAUTH_REFRESH_TOKEN: ${{ secrets.PUB_DEV_OAUTH_REFRESH_TOKEN }}
+    with: 
+      version: ${{ github.event.inputs.version }}
+
+  

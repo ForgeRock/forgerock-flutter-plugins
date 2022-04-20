@@ -1,0 +1,112 @@
+name: Check version number
+on:
+  workflow_call:
+    inputs:
+      version:
+        description: Version number to check
+        type: string
+        required: true
+      
+    secrets:
+      SLACK_WEBHOOK_URL:
+        description: Slack Notifier Incoming Webhook
+        required: true
+
+jobs:
+  # Check release number
+  check-release-number:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: forgerock-authenticator
+
+    steps:
+      - name: Clone the repository
+        uses: actions/checkout@v3
+
+      - name: Get the latest tag
+        uses: actions-ecosystem/action-get-latest-tag@v1
+        with: 
+          with_initial_version: true
+          initial_version: "0.0.0"
+        id: get-latest-tag
+
+      - run: |
+          echo "LATEST_TAG=${{ steps.get-latest-tag.outputs.tag }}" >> $GITHUB_ENV
+          echo "PUBSPEC_VERSION=$(echo $(cat pubspec.yaml | grep -i version | head -1 | awk -F= "{ print $2 }" | sed -E 's/(version)|[:,\",]//gi' | tr -d '[[:space:]]'))" >> $GITHUB_ENV
+          echo "CHANGELOG_VERSION=$(echo $(cat CHANGELOG.md | grep -i version | head -1 | awk -F= "{ print $2 }" | sed -E 's/(version)|[:,\",#]//gi' | tr -d '[[:space:]]'))" >> $GITHUB_ENV
+          echo "NEW_VERSION=${{ inputs.version }}" >> $GITHUB_ENV
+
+      - name: Print versions
+        run: |
+          echo "Checking if version ${{ inputs.version }} is good."
+          echo "LATEST_TAG: ${{ env.LATEST_TAG }}"
+          echo "PUBSPEC_VERSION: ${{ env.PUBSPEC_VERSION }}"
+          echo "CHANGELOG_VERSION: ${{ env.CHANGELOG_VERSION }}"
+          echo "NEW_VERSION: ${{ env.NEW_VERSION }}"
+
+      # Make sure that the version entered is in the expected format
+      - name: Ensure that the new version follows the expected format
+        run: |
+          if [[ ${{ env.NEW_VERSION }} =~ ^[0-9]+\.[0-9]+\.[0-9]+([-][a-zA-Z0-9\.]+)?$ ]]; 
+          then
+            echo "Version number is in the expected format."
+            exit 0
+          else
+            echo "Version number format is NOT good!"
+            exit 1
+          fi
+
+      # The new version should be bigger than the previous release version
+      - name: Ensure the new version is bigger than the last one
+        run: |
+          if [[ ${{ env.NEW_VERSION }} > ${{ env.LATEST_TAG }} ]];
+          then
+            echo "The new version is bigger than the last one (good)!"
+            exit 0
+          else
+            echo "The new version needs to be bigger than the last one!"
+            exit 1
+          fi
+
+      # Check if the version in the pubspec.yaml is the same as the new release version
+      - name: Ensure that the new version matches the one in pubspec.yaml
+        run: |
+          if [[ ${{ env.NEW_VERSION }} == ${{ env.PUBSPEC_VERSION }} ]];
+          then
+            echo "The version in pubspec.yaml is OK!"
+            exit 0
+          else
+            echo "The version in pubspec.yaml does not match the version to be published. Aborting!"
+            exit 1
+          fi
+
+      # Check if the version in the CHANGELOG.md is the same as the new release version
+      - name: Ensure that the new version matches the one in CHANGELOG.md
+        run: |
+          if [[ ${{ env.NEW_VERSION }} == ${{ env.CHANGELOG_VERSION }} ]];
+          then
+            echo "The version in CHANGELOG.md is OK!"
+            exit 0
+          else
+            echo "The version in CHANGELOG.md does not match the version to be published. Aborting!"
+            exit 1
+          fi
+
+      # Send a slack notification if the version check did not pass
+      - name: Send a slack notification
+        uses: 8398a7/action-slack@v3
+        with:
+          status: custom
+          fields: all
+          custom_payload: |
+            {
+              attachments: [{
+                title: ':no_entry: Release version check failed!',
+                color: 'danger',
+                text: `\nWorkflow: ${process.env.AS_WORKFLOW} -> ${process.env.AS_JOB}`, 
+              }]
+            }
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+        if: failure()
