@@ -1,0 +1,10 @@
+{
+  "aps": {
+    "messageId": "AUTHENTICATE:5b967ca8-64c6-44c3-b811-36fe3b1af6b51633393568072",
+    "content-available": 1,
+    "alert": "Login attempt from user0 at ForgeRock",
+    "data": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJjIjoiRER3cE1EOFlEY2YvSmRaL2pBU3diZFRCNkJBOFhDaEFSNkJTc3hHa2J5ND0iLCJ0IjoiMTIwIiwidSI6IjE4OUNBMDY5LUU0MkQtNEZCQS05QTVELUVCMEYxQkQyOUU0MyIsImwiOiJZVzFzWW1OdmIydHBaVDB3TVE9PSJ9.qcXHvnPrISm58iFt2W_nZPULfDhGz4f4KSidZhNvQHg",
+    "sound": "default",
+  },
+  "Simulator Target Bundle": "com.acme.authenticator"
+}

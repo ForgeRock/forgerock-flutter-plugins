@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<data-extraction-rules>
+    <cloud-backup disableIfNoEncryptionCapabilities="false">
+        <include domain="sharedpref" path="com.forgerock.authenticator.DATA.ACCOUNT.xml"/>
+        <include domain="sharedpref" path="com.forgerock.authenticator.DATA.MECHANISM.xml"/>
+        <include domain="sharedpref" path="com.forgerock.authenticator.DATA.NOTIFICATION.xml"/>
+        <include domain="sharedpref" path="FlutterSharedPreferences.xml" />
+    </cloud-backup>
+</data-extraction-rules>

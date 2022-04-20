@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CLIENT_ID</key>
+	<string>1003293418438-nvbieb6vv89s3cn4oo8jj6oj9um58ujo.apps.googleusercontent.com</string>
+	<key>REVERSED_CLIENT_ID</key>
+	<string>com.googleusercontent.apps.1003293418438-nvbieb6vv89s3cn4oo8jj6oj9um58ujo</string>
+	<key>API_KEY</key>
+	<string>AIzaSyAhPardx6g7oBz9ppZEqt-2-YPdhjB4Azc</string>
+	<key>GCM_SENDER_ID</key>
+	<string>1003293418438</string>
+	<key>PLIST_VERSION</key>
+	<string>1</string>
+	<key>BUNDLE_ID</key>
+	<string>com.forgerock.authenticator</string>
+	<key>PROJECT_ID</key>
+	<string>forgerock-authenticator-9bfed</string>
+	<key>STORAGE_BUCKET</key>
+	<string>forgerock-authenticator-9bfed.appspot.com</string>
+	<key>IS_ADS_ENABLED</key>
+	<false></false>
+	<key>IS_ANALYTICS_ENABLED</key>
+	<false></false>
+	<key>IS_APPINVITE_ENABLED</key>
+	<true></true>
+	<key>IS_GCM_ENABLED</key>
+	<true></true>
+	<key>IS_SIGNIN_ENABLED</key>
+	<true></true>
+	<key>GOOGLE_APP_ID</key>
+	<string>1:1003293418438:ios:722bfa2fda064465b8c8c7</string>
+	<key>DATABASE_URL</key>
+	<string>https://forgerock-authenticator-9bfed.firebaseio.com</string>
+</dict>
+</plist>
