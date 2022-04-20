@@ -61,7 +61,7 @@ public class ForgerockAuthenticatorPlugin implements FlutterPlugin, MethodCallHa
     this.context = context;
     this.channel = new MethodChannel(messenger, CHANNEL_NAME);
     this.channel.setMethodCallHandler(this);
-    this.fraClientWrapper = FRAClientWrapper.getInstance(context);
+    this.fraClientWrapper = FRAClientWrapper.init(context);
     this.fraClientWrapper.setChannel(channel);
 
     final EventChannel eventChannel = new EventChannel(messenger, EVENTS_CHANNEL);

@@ -2,7 +2,9 @@
     <!-- System notifications-->
     <string name="system_notification_title">Login attempt from %1$s at %2$s</string>
     <string name="system_notification_body">Tap to log in</string>
+    <string name="system_notification_body_with_actions">Use the buttons to Accept or Reject the request</string>
+    <string name="system_notification_action_approve">Accept</string>
+    <string name="system_notification_action_deny">Reject</string>
     <string name="channel_name">Push Authentication Alerts</string>
     <string name="channel_id">org.forgerock.authenticator.push</string>
-
 </resources>
