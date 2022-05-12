@@ -278,6 +278,7 @@ class FRAStorageClient implements StorageClient {
         List<PushNotification> allPushNotifications = this.getAllNotifications();
         for(PushNotification pushNotification : allPushNotifications){
             if(pushNotification.getMechanismUID().equals(mechanism.getMechanismUID())){
+                pushNotification.setPushMechanism(mechanism);
                 pushNotificationList.add(pushNotification);
             }
         }

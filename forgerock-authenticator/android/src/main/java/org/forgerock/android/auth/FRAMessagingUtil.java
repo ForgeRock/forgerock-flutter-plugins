@@ -36,8 +36,12 @@ class FRAMessagingUtil {
     private static int messageCount = 1;
     private static final Uri defaultSoundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
 
+    /**
+     * Sets the application context.
+     * @param applicationContext application context.
+     */
     static void setApplicationContext(Context applicationContext) {
-        Log.d(TAG, "received application context.");
+        Log.d(TAG, "Received application context.");
         FRAMessagingUtil.applicationContext = applicationContext;
     }
 
@@ -77,46 +81,80 @@ class FRAMessagingUtil {
         return false;
     }
 
-    static void createSystemNotification(PushNotification pushNotification) {
+    /***
+     * Create a system notification for the Push Notification received. If the notification type
+     * is {@code PushType.DEFAULT}, it display actions to approve or reject the notification.
+     *
+     * @param context context.
+     * @param pushNotification the PushNotification to be processed.
+     */
+    static void createSystemNotification(Context context, PushNotification pushNotification) {
         int id = messageCount++;
 
-        Mechanism mechanism = FRAClientWrapper
-                .getInstance(applicationContext)
-                .getMechanism(pushNotification);
+        if (context == null) {
+            context = applicationContext;
+        }
 
-        String title = String.format(applicationContext.getString(R.string.system_notification_title),
-                mechanism.getAccountName(), mechanism.getIssuer());
-        String body = applicationContext.getString(R.string.system_notification_body);
-
-        Notification notification = generatePending(applicationContext, id, title, body);
-
-        NotificationManagerCompat notificationManager = NotificationManagerCompat.from(applicationContext);
+        Notification notification = buildNotification(context, id, pushNotification);
+        Log.d(TAG, "System notification created.");
+        NotificationManagerCompat notificationManager = NotificationManagerCompat.from(context);
         notificationManager.notify(id, notification);
     }
 
-    private static Notification generatePending(Context context, int requestCode, String title, String message) {
+    private static Notification buildNotification(Context context, int requestCode, PushNotification pushNotification) {
+        Log.d(TAG, "Building notification...");
         createNotificationChannel(context);
-        Intent intent = getLaunchIntent(applicationContext);
-        PendingIntent pendingIntent;
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            pendingIntent = PendingIntent.getActivity(context, requestCode, intent, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
 
-        }else {
-            pendingIntent = PendingIntent.getActivity(context, requestCode, intent, PendingIntent.FLAG_UPDATE_CURRENT);
-        }
-        return new NotificationCompat.Builder(context, context.getString(R.string.channel_id))
+        int intentFlags = Build.VERSION.SDK_INT >= Build.VERSION_CODES.O
+                ? PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE
+                : PendingIntent.FLAG_UPDATE_CURRENT;
+
+        Intent intent = getLaunchIntent(context);
+        PendingIntent contentIntent = PendingIntent.getActivity(context, requestCode, intent, intentFlags);
+
+        String title = getTitle(context, pushNotification);
+        String body = getBody(context, pushNotification);
+
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(context, context.getString(R.string.channel_id))
                 .setSmallIcon(R.drawable.forgerock_notification)
                 .setContentTitle(title)
-                .setContentText(message)
+                .setContentText(body)
                 .setAutoCancel(true)
                 .setPriority(NotificationCompat.PRIORITY_DEFAULT)
                 .setSound(defaultSoundUri)
-                .setContentIntent(pendingIntent)
-                .build();
+                .setContentIntent(contentIntent);
+
+        if (pushNotification.getPushType() == PushType.DEFAULT) {
+            Intent acceptIntent = new Intent(context, FRANotificationActionReceiver.class);
+            acceptIntent.setAction(FRANotificationActionReceiver.ACCEPT_ACTION);
+            acceptIntent.putExtra(FRANotificationActionReceiver.MESSAGE_ID_STRING_EXTRA,
+                    pushNotification.getId());
+            acceptIntent.putExtra(FRANotificationActionReceiver.MESSAGE_COUNT_STRING_EXTRA,
+                    requestCode);
+            PendingIntent acceptPendingIntent = PendingIntent.getBroadcast(context,
+                    0, acceptIntent, intentFlags);
+
+            Intent rejectIntent = new Intent(context, FRANotificationActionReceiver.class);
+            rejectIntent.setAction(FRANotificationActionReceiver.REJECT_ACTION);
+            rejectIntent.putExtra(FRANotificationActionReceiver.MESSAGE_ID_STRING_EXTRA,
+                    pushNotification.getId());
+            rejectIntent.putExtra(FRANotificationActionReceiver.MESSAGE_COUNT_STRING_EXTRA,
+                    requestCode);
+            PendingIntent rejectPendingIntent = PendingIntent.getBroadcast(context,
+                    0, rejectIntent, intentFlags);
+
+            builder.addAction(0, context.getString(R.string.system_notification_action_approve),
+                    acceptPendingIntent);
+            builder.addAction(0, context.getString(R.string.system_notification_action_deny),
+                    rejectPendingIntent);
+        }
+
+        return builder.build();
     }
 
     private static void createNotificationChannel(Context context){
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            Log.d(TAG, "Creating notification channel.");
             int importance = NotificationManager.IMPORTANCE_DEFAULT;
             String channelId = context.getString(R.string.channel_id);
             String channelName = context.getString(R.string.channel_name);
@@ -125,6 +163,26 @@ class FRAMessagingUtil {
             if (notificationManager != null) {
                 notificationManager.createNotificationChannel(channel);
             }
+        }
+    }
+
+    private static String getTitle(Context context, PushNotification pushNotification) {
+        if (pushNotification.getMessage() != null) {
+            return pushNotification.getMessage();
+        } else {
+            Mechanism mechanism = FRAClientWrapper
+                    .getInstanceInBackground(context)
+                    .getMechanism(pushNotification);
+            return String.format(context.getString(R.string.system_notification_title),
+                    mechanism.getAccountName(), mechanism.getIssuer());
+        }
+    }
+
+    private static String getBody(Context context, PushNotification pushNotification) {
+        if (pushNotification.getPushType() == PushType.DEFAULT) {
+            return context.getString(R.string.system_notification_body_with_actions);
+        } else {
+            return context.getString(R.string.system_notification_body);
         }
     }
 
