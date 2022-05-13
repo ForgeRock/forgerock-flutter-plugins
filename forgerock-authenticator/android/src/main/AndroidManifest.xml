@@ -18,5 +18,8 @@
                 <action android:name="com.google.android.c2dm.intent.RECEIVE" />
             </intent-filter>
         </receiver>
+        <receiver
+            android:name="org.forgerock.android.auth.FRANotificationActionReceiver"
+            android:exported="false" />
     </application>
 </manifest>

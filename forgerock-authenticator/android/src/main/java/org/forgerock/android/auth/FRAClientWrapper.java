@@ -53,13 +53,13 @@ public class FRAClientWrapper {
 
     public static FRAClientWrapper getInstance() {
         if (INSTANCE == null) {
-            throw new IllegalStateException("AuthenticatorSdk is not initialized. " +
-                    "Please make sure to call AuthenticatorSdk#init first.");
+            throw new IllegalStateException("FRAClientWrapper is not initialized. " +
+                    "Please make sure to call FRAClientWrapper#init first.");
         }
         return INSTANCE;
     }
 
-    public static FRAClientWrapper getInstance(@NonNull Context context) {
+    public static FRAClientWrapper init(@NonNull Context context) {
         synchronized (FRAClientWrapper.class) {
             if (INSTANCE == null) {
                 INSTANCE = new FRAClientWrapper(context);
@@ -68,8 +68,28 @@ public class FRAClientWrapper {
         }
     }
 
+    protected static FRAClientWrapper getInstanceInBackground(@NonNull Context context) {
+        FRAClientWrapper clientWrapper = init(context);
+        clientWrapper.startInBackground();
+        return clientWrapper;
+    }
+
     public void setChannel(MethodChannel channel) {
         this.channel = channel;
+    }
+
+    private void startInBackground() {
+        try {
+            if (fraClient == null) {
+                Log.d(TAG, "Starting SDK in background.");
+                fraClient = FRAClient.builder()
+                        .withContext(context)
+                        .withStorage(storageClient)
+                        .start();
+            }
+        } catch (AuthenticatorException e) {
+            Log.e(TAG, "Error initializing SDK in background.", e);
+        }
     }
 
     public void start(final Result flutterResult) {
@@ -210,7 +230,7 @@ public class FRAClientWrapper {
     }
 
     public void getAllNotifications(Result flutterResult) {
-        List<PushNotification> notificationList = storageClient.getAllNotifications();
+        List<PushNotification> notificationList = fraClient.getAllNotifications();
         List<String> jsonList  = new ArrayList<>();
         for(PushNotification p : notificationList) {
             jsonList.add(p.toJson());
@@ -227,8 +247,12 @@ public class FRAClientWrapper {
         }
     }
 
+    public PushNotification getNotification(String notificationId) {
+        return fraClient.getNotification(notificationId);
+    }
+
     private PushNotification getNotificationByMessageId(String messageId) {
-        List<PushNotification> allPushNotifications = storageClient.getAllNotifications();
+        List<PushNotification> allPushNotifications = fraClient.getAllNotifications();
         for(PushNotification pushNotification : allPushNotifications){
             if(pushNotification.getMessageId().equals(messageId)){
                 return pushNotification;
@@ -238,7 +262,7 @@ public class FRAClientWrapper {
     }
 
     public Mechanism getMechanism(@NonNull PushNotification notification) {
-        return storageClient.getMechanismByUUID(notification.getMechanismUID());
+        return fraClient.getMechanism(notification);
     }
 
     public void getAllMechanismsGroupByUID(Result flutterResult) {
@@ -273,10 +297,9 @@ public class FRAClientWrapper {
         }
     }
 
-    public PushNotification handleMessage(String messageId, String message) {
+    protected PushNotification handleMessageInBackground(String messageId, String message) {
         try {
-            NotificationFactory notificationFactory = new NotificationFactory(storageClient);
-            PushNotification pushNotification = notificationFactory.handleMessage(messageId, message);
+            PushNotification pushNotification = fraClient.handleMessage(messageId, message);
             if(channel != null && pushNotification != null) {
                 new Handler(Looper.getMainLooper()).post(new Runnable() {
                     public void run() {

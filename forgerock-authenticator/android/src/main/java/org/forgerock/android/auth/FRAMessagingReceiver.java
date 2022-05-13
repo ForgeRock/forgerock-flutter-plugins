@@ -25,15 +25,16 @@ public class FRAMessagingReceiver extends BroadcastReceiver {
 
     @Override
     public void onReceive(Context context, Intent intent) {
-        Log.d(TAG, "broadcast received for message");
+        Log.d(TAG, "Broadcast received for message");
 
         FRAMessagingUtil.setApplicationContext(context.getApplicationContext());
 
         if (intent.getExtras() == null) {
-            Log.d(TAG,"broadcast received but intent contained no extras to process RemoteMessage. Operation cancelled.");
+            Log.d(TAG,"Broadcast received but intent contained no extras to process " +
+                    "RemoteMessage. Operation cancelled.");
             return;
         }
-
+        
         RemoteMessage remoteMessage = new RemoteMessage(intent.getExtras());
         Log.d(TAG, "RemoteMessage Data: " + remoteMessage.getData());
 
@@ -42,16 +43,19 @@ public class FRAMessagingReceiver extends BroadcastReceiver {
             notifications.put(remoteMessage.getMessageId(), remoteMessage);
 
             // Send remote message received to be processed by the Authenticator SDK
-            PushNotification pushNotification =  FRAClientWrapper
-                    .getInstance(context.getApplicationContext())
-                    .handleMessage(remoteMessage.getData().get(MESSAGE_ID), remoteMessage.getData().get(MESSAGE));
+            PushNotification pushNotification = FRAClientWrapper
+                    .getInstanceInBackground(context.getApplicationContext())
+                    .handleMessageInBackground(remoteMessage.getData().get(MESSAGE_ID),
+                            remoteMessage.getData().get(MESSAGE));
 
             // If it's a valid Push message from AM, create a system notification
             if(pushNotification != null && !FRAMessagingUtil.isApplicationForeground(context)) {
                 Log.d(TAG, "Creating system notification...");
-                FRAMessagingUtil.createSystemNotification(pushNotification);
+                FRAMessagingUtil.createSystemNotification(context.getApplicationContext(),
+                        pushNotification);
             } else {
-                Log.d(TAG, "Failed to process Push Notification. System notification not created.");
+                Log.d(TAG, "Failed to process Push Notification. System notification " +
+                        "not created.");
             }
         } else {
             Log.d(TAG, "Failed to obtain RemoteMessage from intent.");
