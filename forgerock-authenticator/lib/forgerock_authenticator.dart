@@ -146,7 +146,7 @@ class ForgerockAuthenticator {
     }
   }
 
-  /// Respond an authentication request from a given [PushNotification] received from OpenAM.
+  /// Respond a [PushType.DEFAULT] authentication request from a given [PushNotification] received from OpenAM.
   static Future<bool?> performPushAuthentication(PushNotification pushNotification, bool accept) async {
     String notificationId = pushNotification.id;
     var params = <String, dynamic>{
@@ -154,6 +154,35 @@ class ForgerockAuthenticator {
       'accept': accept,
     };
     return await _channel.invokeMethod('performPushAuthentication', params);
+  }
+
+  /// Respond a [PushType.CHALLENGE] authentication request from a given [PushNotification] received from OpenAM.
+  ///
+  /// Note: This API is available with OpenAM 7.2 and beyond
+  static Future<bool?> performPushAuthenticationWithChallenge(PushNotification pushNotification,
+      String challengeResponse, bool accept) async {
+    String notificationId = pushNotification.id;
+    var params = <String, dynamic>{
+      'notificationId': notificationId,
+      'challengeResponse': challengeResponse,
+      'accept': accept,
+    };
+    return await _channel.invokeMethod('performPushAuthenticationWithChallenge', params);
+  }
+
+  /// Respond a [PushType.BIOMETRIC] authentication request from a given [PushNotification] received from OpenAM.
+  ///
+  /// Note: This API is available with OpenAM 7.2 and beyond
+  static Future<bool?> performPushAuthenticationWithBiometric(PushNotification pushNotification,
+      String title, bool allowDeviceCredentials, bool accept) async {
+    String notificationId = pushNotification.id;
+    var params = <String, dynamic>{
+      'notificationId': notificationId,
+      'title': title,
+      'allowDeviceCredentials': allowDeviceCredentials,
+      'accept': accept,
+    };
+    return await _channel.invokeMethod('performPushAuthenticationWithBiometric', params);
   }
 
   /// Get all of the notifications that belong to an [Account] object.

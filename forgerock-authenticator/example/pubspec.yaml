@@ -10,7 +10,6 @@ environment:
   sdk: ">=2.7.0 <3.0.0"
 
 dependencies:
-
   flutter:
     sdk: flutter
 
@@ -22,9 +21,6 @@ dependencies:
     # the parent directory to use the current plugin's version.
     path: ../
 
-  cupertino_icons:
-  flutter_localizations:
-    sdk: flutter
   provider: ^6.0.3
   barcode_scan2: ^4.2.1
 

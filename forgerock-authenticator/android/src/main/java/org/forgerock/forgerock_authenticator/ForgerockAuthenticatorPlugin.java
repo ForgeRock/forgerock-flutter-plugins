@@ -11,10 +11,13 @@ import android.app.Activity;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.os.Build;
 import android.util.Log;
 import android.view.WindowManager;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.RequiresApi;
+import androidx.fragment.app.FragmentActivity;
 
 import org.forgerock.android.auth.FRAClientWrapper;
 
@@ -39,7 +42,7 @@ public class ForgerockAuthenticatorPlugin implements FlutterPlugin, MethodCallHa
   /// when the Flutter Engine is detached from the Activity
   private MethodChannel channel;
   private FRAClientWrapper fraClientWrapper;
-  private Activity activity;
+  private FragmentActivity activity;
   private Context context;
   private BroadcastReceiver changeReceiver;
   private String initialLink;
@@ -68,6 +71,7 @@ public class ForgerockAuthenticatorPlugin implements FlutterPlugin, MethodCallHa
     eventChannel.setStreamHandler(this);
   }
 
+  @RequiresApi(api = Build.VERSION_CODES.M)
   @Override
   public void onMethodCall(@NonNull MethodCall call, @NonNull Result result) {
     switch (call.method) {
@@ -78,7 +82,7 @@ public class ForgerockAuthenticatorPlugin implements FlutterPlugin, MethodCallHa
         result.success(this.latestLink);
         break;
       case "start":
-        this.fraClientWrapper.start(result);
+        this.fraClientWrapper.start(result, activity);
         break;
       case "createMechanismFromUri":
         String uri = call.argument("uri");
@@ -131,8 +135,26 @@ public class ForgerockAuthenticatorPlugin implements FlutterPlugin, MethodCallHa
       }
       case "performPushAuthentication": {
         String notificationId = call.argument("notificationId");
-        boolean accept = call.argument("accept");
+        boolean accept = Boolean.TRUE.equals(call.argument("accept"));
         this.fraClientWrapper.performPushAuthentication(notificationId, accept, result);
+        break;
+      }
+      case "performPushAuthenticationWithChallenge": {
+        String notificationId = call.argument("notificationId");
+        String challengeResponse = call.argument("challengeResponse");
+        boolean accept = Boolean.TRUE.equals(call.argument("accept"));
+        this.fraClientWrapper.performPushAuthenticationWithChallenge(notificationId,
+                challengeResponse, accept, result);
+        break;
+      }
+      case "performPushAuthenticationWithBiometric": {
+        String notificationId = call.argument("notificationId");
+        String title = call.argument("title");
+        boolean allowDeviceCredentials = Boolean.TRUE.equals(call.argument("allowDeviceCredentials"));
+        boolean accept = Boolean.TRUE.equals(call.argument("accept"));
+        FragmentActivity fragmentActivity = (FragmentActivity) activity;
+        this.fraClientWrapper.performPushAuthenticationWithBiometric(notificationId, title,
+                allowDeviceCredentials, accept, fragmentActivity, result);
         break;
       }
       case "setStoredAccount": {
@@ -228,7 +250,7 @@ public class ForgerockAuthenticatorPlugin implements FlutterPlugin, MethodCallHa
 
   @Override
   public void onAttachedToActivity(@NonNull ActivityPluginBinding activityPluginBinding) {
-    this.activity = activityPluginBinding.getActivity();
+    this.activity = (FragmentActivity) activityPluginBinding.getActivity();
 
     activityPluginBinding.addOnNewIntentListener(this);
     this.handleIntent(this.context, activityPluginBinding.getActivity().getIntent());
