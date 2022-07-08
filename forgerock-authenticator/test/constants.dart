@@ -97,6 +97,38 @@ const String pushNotificationJson = "{" +
     "\"approved\":false," +
     "\"pending\":true}";
 
+const String challengePushNotificationJson = '{'
+    '\"id\":\"0c43c695-8d67-47f1-b575-1c7a83512060-1657238273273\",'
+    '\"mechanismUID\":\"0c43c695-8d67-47f1-b575-1c7a83512060\",'
+    '\"messageId\":\"AUTHENTICATE:2b43a378-0013-4589-8e81-118be10559ac1657238273273\",'
+    '\"message\":\"Login attempt from user0 at ForgeRock-72\",'
+    '\"challenge\":\"23RD41+UyKFZ77Am3Pu5Oxm7L3lu6CB+IhT3ZN4KzQo=\",'
+    '\"amlbCookie\":\"amlbcookie=01\",'
+    '\"timeAdded\":1657238273273,'
+    '\"timeExpired\":1657238393273,'
+    '\"ttl\":120,'
+    '\"approved\":false,\"pending\":true,'
+    '\"customPayload\":\"{  }\",'
+    '\"contextInfo\":\"{ \\"location\\": { \\"latitude\\": 49.2306432, \\"longitude\\": -123.1126528 }, \\"remoteIp\\": \\"192.168.1.1\\", \\"userAgent\\": \\"Mozilla\/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit\/537.36 (KHTML, like Gecko) Chrome\/102.0.0.0 Safari\/537.36\\" }\",'
+    '\"pushType\":\"challenge\",'
+    '\"numbersChallenge\":\"27,64,71\"}';
+
+const String biometricPushNotificationJson = '{'
+    '\"id\":\"0c43c695-8d67-47f1-b575-1c7a83512060-1657238273273\",'
+    '\"mechanismUID\":\"0c43c695-8d67-47f1-b575-1c7a83512060\",'
+    '\"messageId\":\"AUTHENTICATE:2b43a378-0013-4589-8e81-118be10559ac1657238273273\",'
+    '\"message\":\"Login attempt from user0 at ForgeRock-72\",'
+    '\"challenge\":\"23RD41+UyKFZ77Am3Pu5Oxm7L3lu6CB+IhT3ZN4KzQo=\",'
+    '\"amlbCookie\":\"amlbcookie=01\",'
+    '\"timeAdded\":1657238273273,'
+    '\"timeExpired\":1657238393273,'
+    '\"ttl\":120,'
+    '\"approved\":false,\"pending\":true,'
+    '\"customPayload\":\"{  }\",'
+    '\"contextInfo\":\"{ \\"location\\": { \\"latitude\\": 49.2306432, \\"longitude\\": -123.1126528 }, \\"remoteIp\\": \\"192.168.1.1\\", \\"userAgent\\": \\"Mozilla\/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit\/537.36 (KHTML, like Gecko) Chrome\/102.0.0.0 Safari\/537.36\\" }\",'
+    '\"pushType\":\"biometric\",'
+    '\"numbersChallenge\":null}';
+
 const String apnsPayload = '{ "aps": { "category": "authentication","messageId": "AUTHENTICATE:63ca6f18-7cfb-4198-bcd0-ac5041fbbea01583798229441","content-available": 1, "interruption-level": "time-sensitive" , "alert": "Login attempt from user1 at issuer1", "sound": "default", "data": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJjIjoiRER3cE1EOFlEY2YvSmRaL2pBU3diZFRCNkJBOFhDaEFSNkJTc3hHa2J5ND0iLCJ0IjoiMTIwIiwidSI6IjE4OUNBMDY5LUU0MkQtNEZCQS05QTVELUVCMEYxQkQyOUU0MyIsImwiOiJZVzFzWW1OdmIydHBaVDB3TVE9PSJ9.qcXHvnPrISm58iFt2W_nZPULfDhGz4f4KSidZhNvQHg"}}';
 
 const String oathTokenCodeJson = "{\"oathType\":\"HOTP\",\"code\":\"123456\",\"start\":10000,\"until\":10030}";

@@ -70,8 +70,22 @@ class AuthenticatorProvider with ChangeNotifier {
     return ForgerockAuthenticator.getOathTokenCode(mechanismId);
   }
 
-  static Future<bool> performPushAuthentication(PushNotification pushNotification, bool accept) async {
+  static Future<bool> performPushAuthentication(PushNotification pushNotification,
+      bool accept) async {
     return ForgerockAuthenticator.performPushAuthentication(pushNotification, accept);
+  }
+
+  static Future<bool> performPushAuthenticationWithChallenge(
+      PushNotification pushNotification, String challengeResponse, bool accept) async {
+    return ForgerockAuthenticator.performPushAuthenticationWithChallenge(pushNotification,
+        challengeResponse, accept);
+  }
+
+  static Future<bool> performPushAuthenticationWithBiometric(
+      PushNotification pushNotification, String title,
+      bool allowDeviceCredentials, bool accept) async {
+    return ForgerockAuthenticator.performPushAuthenticationWithBiometric(pushNotification,
+        title, allowDeviceCredentials, accept);
   }
 
 }
