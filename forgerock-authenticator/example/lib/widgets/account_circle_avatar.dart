@@ -7,7 +7,7 @@
 
 import 'package:flutter/material.dart';
 
-/// This widget creates a [CircleAvatar] to reprsent the [Account].
+/// This widget creates a [CircleAvatar] to represent the [Account].
 class AccountCircleAvatar extends StatelessWidget {
 
   final String text;

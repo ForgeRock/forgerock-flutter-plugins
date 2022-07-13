@@ -272,20 +272,71 @@ open class FRAClientWrapper {
                 }
             }
         } else {
-            pushNotification?.deny {
-                if (result != nil) {
-                    result!(true)
-                }
-            } onError: { (error) in
-                if (result != nil) {
-                    result!(FlutterError(code: "HANDLE_NOTIFICATION_EXCEPTION", message: error.localizedDescription, details: nil))
-                }
-            }
+            denyPushNotification(pushNotification: pushNotification, result: result)
         }
 
         self.updatePendingNotificationsCount()
     }
 
+    func performPushAuthenticationWithChallenge(notificationId: String, challengeResponse: String, accept: Bool, result: FlutterResult?) {
+        let pushNotification = FRAClient.shared?.getNotification(identifier: notificationId)
+
+        if(accept) {
+            pushNotification?.accept(
+            challengeResponse: challengeResponse,
+            onSuccess:{
+                if (result != nil) {
+                    result!(true)
+                }
+            },
+            onError: { (error) in
+                if (result != nil) {
+                    result!(FlutterError(code: "HANDLE_NOTIFICATION_EXCEPTION", message: error.localizedDescription, details: nil))
+                }
+            })
+        } else {
+            denyPushNotification(pushNotification: pushNotification, result: result)
+        }
+
+        self.updatePendingNotificationsCount()
+    }
+    
+    func performPushAuthenticationWithBiometric(notificationId: String, title: String, allowDeviceCredentials: Bool, accept: Bool, result: FlutterResult?) {
+        let pushNotification = FRAClient.shared?.getNotification(identifier: notificationId)
+
+        if(accept) {
+            pushNotification?.accept(
+            title: title,
+            allowDeviceCredentials: allowDeviceCredentials,
+            onSuccess: {
+                if (result != nil) {
+                    result!(true)
+                }
+            },
+            onError: { (error) in
+                if (result != nil) {
+                    result!(FlutterError(code: "HANDLE_NOTIFICATION_EXCEPTION", message: error.localizedDescription, details: nil))
+                }
+            })
+        } else {
+            denyPushNotification(pushNotification: pushNotification, result: result)
+        }
+
+        self.updatePendingNotificationsCount()
+    }
+
+    private func denyPushNotification(pushNotification: PushNotification?, result: FlutterResult?) {
+        pushNotification?.deny {
+            if (result != nil) {
+                result!(true)
+            }
+        } onError: { (error) in
+            if (result != nil) {
+                result!(FlutterError(code: "HANDLE_NOTIFICATION_EXCEPTION", message: error.localizedDescription, details: nil))
+            }
+        }
+    }
+    
     func getPendingNotificationsCount(result: @escaping FlutterResult) {
         result(pendingNotificationsCount())
     }

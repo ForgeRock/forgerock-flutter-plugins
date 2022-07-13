@@ -8,11 +8,14 @@
 package org.forgerock.android.auth;
 
 import android.content.Context;
+import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.RequiresApi;
+import androidx.fragment.app.FragmentActivity;
 
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
@@ -315,38 +318,48 @@ public class FRAClientWrapper {
                                           Result flutterResult) {
         PushNotification pushNotification = fraClient.getNotification(notificationId);
         if (accept) {
-            acceptMessage(pushNotification, flutterResult);
+            pushNotification.accept(pushAuthenticationListener(pushNotification, flutterResult));
         } else {
             denyMessage(pushNotification, flutterResult);
         }
     }
 
-    private void acceptMessage(PushNotification pushNotification, Result flutterResult) {
-        pushNotification.accept(new FRAListener<Void>() {
-            @Override
-            public void onSuccess(Void result) {
-                new Handler(Looper.getMainLooper()).post(new Runnable() {
-                    @Override
-                    public void run() {
-                        flutterResult.success(true);
-                    }
-                });
-            }
+    public void performPushAuthenticationWithChallenge(String notificationId,
+                                                       String challengeResponse,
+                                                       boolean accept,
+                                                       Result flutterResult) {
+        PushNotification pushNotification = fraClient.getNotification(notificationId);
+        if (accept) {
+            pushNotification.accept(challengeResponse,
+                    pushAuthenticationListener(pushNotification, flutterResult));
+        } else {
+            denyMessage(pushNotification, flutterResult);
+        }
+    }
 
-            @Override
-            public void onException(Exception e) {
-                new Handler(Looper.getMainLooper()).post(new Runnable() {
-                    @Override
-                    public void run() {
-                        flutterResult.error("HANDLE_NOTIFICATION_EXCEPTION", e.getLocalizedMessage(), pushNotification.toJson());
-                    }
-                });
-            }
-        });
+    @RequiresApi(api = Build.VERSION_CODES.M)
+    public void performPushAuthenticationWithBiometric(String notificationId,
+                                                       String title,
+                                                       boolean allowDeviceCredentials,
+                                                       boolean accept,
+                                                       FragmentActivity activity,
+                                                       Result flutterResult) {
+        PushNotification pushNotification = fraClient.getNotification(notificationId);
+        if (accept) {
+            pushNotification.accept(title, null, allowDeviceCredentials, activity,
+                    pushAuthenticationListener(pushNotification, flutterResult));
+        } else {
+            denyMessage(pushNotification, flutterResult);
+        }
     }
 
     private void denyMessage(PushNotification pushNotification, Result flutterResult) {
-        pushNotification.deny(new FRAListener<Void>() {
+        pushNotification.deny(pushAuthenticationListener(pushNotification, flutterResult));
+    }
+
+    private FRAListener<Void> pushAuthenticationListener(PushNotification pushNotification,
+                                                         Result flutterResult) {
+        return new FRAListener<Void>() {
             @Override
             public void onSuccess(Void result) {
                 new Handler(Looper.getMainLooper()).post(new Runnable() {
@@ -362,11 +375,12 @@ public class FRAClientWrapper {
                 new Handler(Looper.getMainLooper()).post(new Runnable() {
                     @Override
                     public void run() {
-                        flutterResult.error("HANDLE_NOTIFICATION_EXCEPTION", e.getLocalizedMessage(), pushNotification.toJson());
+                        flutterResult.error("HANDLE_NOTIFICATION_EXCEPTION",
+                                e.getLocalizedMessage(), pushNotification.toJson());
                     }
                 });
             }
-        });
+        };
     }
 
     //

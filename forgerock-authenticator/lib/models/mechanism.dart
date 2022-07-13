@@ -5,8 +5,6 @@
  * of the MIT license. See the LICENSE file for details.
  */
 
-import 'dart:convert';
-
 import 'account.dart';
 import 'push_mechanism.dart';
 import 'oath_mechanism.dart';
@@ -50,7 +48,7 @@ class Mechanism {
       'accountName': accountName,
       'mechanismUID': mechanismUID,
       'type': type,
-      'secret': null
+      'secret': _secret?.replaceRange(0, null, 'REMOVED')
   };
 
   /// Gets the account identification associated with the mechanism.

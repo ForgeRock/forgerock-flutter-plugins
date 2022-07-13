@@ -162,6 +162,35 @@ public class SwiftForgerockAuthenticatorPlugin: NSObject, FlutterPlugin, UNUserN
                 result(FlutterError(code: "PLATAFORM_ARGUMENT_EXCEPTION", message: "iOS could not recognize flutter arguments in method: (performPushAuthentication)", details: nil))
             }
 
+        case "performPushAuthenticationWithChallenge":
+            guard let args = call.arguments else {
+                return
+            }
+            if let myArgs = args as? [String: Any],
+               let accept = myArgs["accept"] as? Bool,
+               let challengeResponse = myArgs["challengeResponse"] as? String,
+               let notificationId = myArgs["notificationId"] as? String {
+
+                FRAClientWrapper.shared.performPushAuthenticationWithChallenge(notificationId: notificationId, challengeResponse: challengeResponse, accept: accept, result: result)
+            } else {
+                result(FlutterError(code: "PLATAFORM_ARGUMENT_EXCEPTION", message: "iOS could not recognize flutter arguments in method: (performPushAuthentication)", details: nil))
+            }
+            
+        case "performPushAuthenticationWithBiometric":
+            guard let args = call.arguments else {
+                return
+            }
+            if let myArgs = args as? [String: Any],
+               let accept = myArgs["accept"] as? Bool,
+               let allowDeviceCredentials = myArgs["allowDeviceCredentials"] as? Bool,
+               let title = myArgs["title"] as? String,
+               let notificationId = myArgs["notificationId"] as? String {
+
+                FRAClientWrapper.shared.performPushAuthenticationWithBiometric(notificationId: notificationId, title: title, allowDeviceCredentials: allowDeviceCredentials, accept: accept, result: result)
+            } else {
+                result(FlutterError(code: "PLATAFORM_ARGUMENT_EXCEPTION", message: "iOS could not recognize flutter arguments in method: (performPushAuthentication)", details: nil))
+            }
+            
         case "getStoredAccount":
             guard let args = call.arguments else {
                 return

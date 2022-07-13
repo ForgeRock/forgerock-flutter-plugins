@@ -144,6 +144,39 @@ void main() {
     ]);
   });
 
+  test('performPushAuthenticationWithChallenge', () async {
+    final PushNotification notification = PushNotification.fromJson(jsonDecode(challengePushNotificationJson));
+    expect(await ForgerockAuthenticator.performPushAuthenticationWithChallenge(notification, "71", true), isTrue);
+    expect(methodCallLog, hasLength(1));
+    expect(methodCallLog, <Matcher>[
+      isMethodCall(
+        'performPushAuthenticationWithChallenge',
+        arguments: <String, dynamic>{
+          "notificationId": notification.id,
+          "challengeResponse": "71",
+          "accept": true
+        },
+      ),
+    ]);
+  });
+
+  test('performPushAuthenticationWithBiometric', () async {
+    final PushNotification notification = PushNotification.fromJson(jsonDecode(challengePushNotificationJson));
+    expect(await ForgerockAuthenticator.performPushAuthenticationWithBiometric(notification, "Title", true, true), isTrue);
+    expect(methodCallLog, hasLength(1));
+    expect(methodCallLog, <Matcher>[
+      isMethodCall(
+        'performPushAuthenticationWithBiometric',
+        arguments: <String, dynamic>{
+          "notificationId": notification.id,
+          "title": "Title",
+          "allowDeviceCredentials": true,
+          "accept": true
+        },
+      ),
+    ]);
+  });
+
   test('getAllNotifications', () async {
     expect(await ForgerockAuthenticator.getAllNotifications(), List.empty());
     expect(methodCallLog, hasLength(2));
@@ -247,6 +280,10 @@ void setupForgerockAuthenticatorMocks() {
       case 'enableScreenshot':
       case 'disableScreenshot':
       case 'performPushAuthentication':
+        return true;
+      case 'performPushAuthenticationWithChallenge':
+        return true;
+      case 'performPushAuthenticationWithBiometric':
         return true;
       default:
         return null;

@@ -25,7 +25,7 @@ class NotificationBox extends StatelessWidget {
       child: Stack(
         children: <Widget>[
           Container(
-            padding: const EdgeInsets.only(left: 20, top: 65, right: 20, bottom: 20),
+            padding: const EdgeInsets.all(20),
             decoration: BoxDecoration(
               shape: BoxShape.rectangle,
               color: Colors.white,
@@ -33,21 +33,11 @@ class NotificationBox extends StatelessWidget {
               boxShadow: const [
                 BoxShadow(
                   color: Colors.black,offset: Offset(0,5),
-                  blurRadius: 10
+                  blurRadius: 5
                 ),
               ]
             ),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: <Widget>[
-                Text('Push Authentication request',
-                  style: const TextStyle(fontSize: 18,fontWeight: FontWeight.w600),textAlign: TextAlign.center,
-                ),
-                const SizedBox(height: 15),
-                child,
-                const SizedBox(width: 15),
-              ],
-            ),
+            child: child,
           ),
         ],
       ),
