@@ -23,7 +23,7 @@ rootProject.allprojects {
 apply plugin: 'com.android.library'
 
 android {
-    compileSdkVersion 30
+    compileSdkVersion 33
 
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
@@ -31,12 +31,13 @@ android {
     }
 
     defaultConfig {
-        minSdkVersion 21
+        minSdkVersion 23
     }
 }
 
 dependencies {
-    implementation 'androidx.annotation:annotation:1.2.0'
+    implementation 'androidx.annotation:annotation:1.4.0'
+    implementation 'androidx.activity:activity:1.5.1'
     implementation 'com.google.firebase:firebase-messaging:21.1.0'
     implementation 'com.google.android.gms:play-services-location:18.0.0'
 

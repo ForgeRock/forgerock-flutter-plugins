@@ -93,7 +93,7 @@ public class FRAClientWrapper {
         }
     }
 
-    public void start(final Result flutterResult) {
+    public void start(final Result flutterResult, final FragmentActivity activity) {
         try {
             // Initialise SDK passing application Context and custom StorageClient
             fraClient = FRAClient.builder()
@@ -108,8 +108,11 @@ public class FRAClientWrapper {
                         public void onComplete(@NonNull Task<String> task) {
                             if (!task.isSuccessful()) {
                                 if(task.getException() != null) {
-                                    Log.e(TAG, "FirebaseMessaging.getInstance failed", task.getException());
-                                    flutterResult.error("PUSH_REGISTRATION_EXCEPTION", "FirebaseMessaging.getInstance failed", task.getException().getLocalizedMessage());
+                                    Log.e(TAG, "FirebaseMessaging.getInstance failed",
+                                            task.getException());
+                                    flutterResult.error("PUSH_REGISTRATION_EXCEPTION",
+                                            "FirebaseMessaging.getInstance failed",
+                                            task.getException().getLocalizedMessage());
                                 }
                                 return;
                             }
@@ -123,10 +126,20 @@ public class FRAClientWrapper {
                             // Register the token with the SDK to enable Push mechanisms
                             try {
                                 fraClient.registerForRemoteNotifications(fcmToken);
+
+                                // Request notification permission for Android 13 and above
+                                if (Build.VERSION.SDK_INT >= 33) {
+                                    FRANotificationPermissionHelper permissionHelper = FRANotificationPermissionHelper
+                                            .init(activity);
+                                    permissionHelper.requestNotificationPermission();
+                                }
+
                                 flutterResult.success(true);
                             } catch (AuthenticatorException e) {
                                 Log.e(TAG, "PUSH_REGISTRATION_EXCEPTION", e);
-                                flutterResult.error("PUSH_REGISTRATION_EXCEPTION", e.getLocalizedMessage(), "Device token: " + fcmToken);
+                                flutterResult.error("PUSH_REGISTRATION_EXCEPTION",
+                                        e.getLocalizedMessage(),
+                                        "Device token: " + fcmToken);
                             }
                         }
                     });

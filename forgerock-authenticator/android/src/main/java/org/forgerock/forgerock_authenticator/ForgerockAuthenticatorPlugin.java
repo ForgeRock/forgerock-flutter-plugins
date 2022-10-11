@@ -42,7 +42,7 @@ public class ForgerockAuthenticatorPlugin implements FlutterPlugin, MethodCallHa
   /// when the Flutter Engine is detached from the Activity
   private MethodChannel channel;
   private FRAClientWrapper fraClientWrapper;
-  private Activity activity;
+  private FragmentActivity activity;
   private Context context;
   private BroadcastReceiver changeReceiver;
   private String initialLink;
@@ -82,7 +82,7 @@ public class ForgerockAuthenticatorPlugin implements FlutterPlugin, MethodCallHa
         result.success(this.latestLink);
         break;
       case "start":
-        this.fraClientWrapper.start(result);
+        this.fraClientWrapper.start(result, activity);
         break;
       case "createMechanismFromUri":
         String uri = call.argument("uri");
@@ -250,7 +250,7 @@ public class ForgerockAuthenticatorPlugin implements FlutterPlugin, MethodCallHa
 
   @Override
   public void onAttachedToActivity(@NonNull ActivityPluginBinding activityPluginBinding) {
-    this.activity = activityPluginBinding.getActivity();
+    this.activity = (FragmentActivity) activityPluginBinding.getActivity();
 
     activityPluginBinding.addOnNewIntentListener(this);
     this.handleIntent(this.context, activityPluginBinding.getActivity().getIntent());
