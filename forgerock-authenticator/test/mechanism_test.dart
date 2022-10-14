@@ -60,6 +60,7 @@ void main() {
       expect(jsonMap['accountName'], 'user1');
       expect(jsonMap['issuer'], 'issuer1');
       expect(jsonMap['type'], 'otpauth');
+      expect(jsonMap['secret'], 'REMOVED');
     });
 
     test('returns an JSON representation of the OathMechanism object successfully', () async {
