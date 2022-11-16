@@ -48,12 +48,23 @@ class PushNotification {
 
   /// Deserializes the specified JSON into an object of the [PushNotification] object.
   factory PushNotification.fromJson(Map<String, dynamic>? json) {
-      String pushType = json?['pushType'] == null ? PushType.DEFAULT.value : json?['pushType'];
-      return PushNotification(json?['mechanismUID'],json?['messageId'],json?['challenge'],
-          json?['amlbCookie'],json?['customPayload'],json?['message'],json?['contextInfo'],
-          json?['numbersChallenge'],json?['timeAdded'],json?['timeExpired'],json?['ttl'],
-          json?['approved'],json?['pending'],pushType.parsePushType()
-      );
+    String pushType =
+        json?['pushType'] == null ? PushType.DEFAULT.value : json?['pushType'];
+    return PushNotification(
+        json?['mechanismUID'],
+        json?['messageId'],
+        json?['challenge'],
+        json?['amlbCookie'],
+        json?['customPayload'],
+        json?['message'],
+        json?['contextInfo'],
+        json?['numbersChallenge'],
+        json?['timeAdded'],
+        json?['timeExpired'],
+        json?['ttl'],
+        json?['approved'],
+        json?['pending'],
+        pushType.parsePushType());
   }
 
   /// Sets the mechanism object associated with the notification.
@@ -69,7 +80,7 @@ class PushNotification {
   /// Gets the challenge numbers associated with the notification.
   /// If no challenge numbers are available, return an empty list.
   List<String>? getNumbersChallenge() {
-    if(numbersChallenge == null) {
+    if (numbersChallenge == null) {
       return List.empty();
     }
     return numbersChallenge?.split(',');
@@ -78,12 +89,12 @@ class PushNotification {
   /// Gets the contextual information associated with the notification.
   /// If no context information is available, return an empty Map.
   Map<String, dynamic>? getContextInfo() {
-    if(contextInfo == null) {
+    if (contextInfo == null) {
       return Map();
     }
     return jsonDecode(contextInfo!);
   }
-  
+
   /// Determine if the notification has expired.
   bool isExpired() {
     var now = DateTime.now();
@@ -93,21 +104,21 @@ class PushNotification {
 
   /// Creates a JSON string representation of [PushNotification] object.
   Map<String, dynamic> toJson() => {
-    'id': '$mechanismUID-$timeAdded',
-    'mechanismUID': mechanismUID,
-    'messageId': messageId,
-    'challenge': challenge,
-    'amlbCookie': amlbCookie,
-    'timeAdded': timeAdded,
-    'timeExpired': timeExpired,
-    'ttl': ttl,
-    'approved': approved,
-    'pending': pending,
-    'customPayload': customPayload,
-    'numbersChallenge': numbersChallenge,
-    'contextInfo': contextInfo,
-    'pushType': pushType?.value,
-  };
+        'id': '$mechanismUID-$timeAdded',
+        'mechanismUID': mechanismUID,
+        'messageId': messageId,
+        'challenge': challenge,
+        'amlbCookie': amlbCookie,
+        'timeAdded': timeAdded,
+        'timeExpired': timeExpired,
+        'ttl': ttl,
+        'approved': approved,
+        'pending': pending,
+        'customPayload': customPayload,
+        'numbersChallenge': numbersChallenge,
+        'contextInfo': contextInfo,
+        'pushType': pushType?.value,
+      };
 
   /// Creates a String representation of [PushNotification] object.
   String toString() => jsonEncode(toJson());
@@ -116,5 +127,4 @@ class PushNotification {
   String get id {
     return '$mechanismUID-$timeAdded';
   }
-
 }

@@ -26,21 +26,31 @@ class Account {
   List<Mechanism>? mechanismList;
 
   /// Creates Account object with given information.
-  Account(this.id, this.issuer, this.displayIssuer, this.accountName, this.displayAccountName,
-      this.imageURL, this.backgroundColor, this.timeAdded, [this.mechanismList]);
+  Account(
+      this.id,
+      this.issuer,
+      this.displayIssuer,
+      this.accountName,
+      this.displayAccountName,
+      this.imageURL,
+      this.backgroundColor,
+      this.timeAdded,
+      [this.mechanismList]);
 
   /// Deserializes the specified Json into an object of the [Account] object.
   /// This account object may include a list of [Mechanism]
   factory Account.fromJson(Map<String, dynamic> json) {
     Account account = Account(
-        json['id'],  json['issuer'], json['displayIssuer'],
-        json['accountName'], json['displayAccountName'],
+        json['id'],
+        json['issuer'],
+        json['displayIssuer'],
+        json['accountName'],
+        json['displayAccountName'],
         json['imageURL'] == 'null' ? null : json['imageURL'],
         json['backgroundColor'] == 'null' ? null : json['backgroundColor'],
-        json['timeAdded']
-    );
+        json['timeAdded']);
 
-    if(json['mechanismList'] != null) {
+    if (json['mechanismList'] != null) {
       List? toParseList;
       if (json['mechanismList'] is String) {
         toParseList = jsonDecode(json['mechanismList']);
@@ -50,9 +60,9 @@ class Account {
 
       List<Mechanism> mechanismList = [];
       for (final element in toParseList!) {
-        if(element is String) {
+        if (element is String) {
           mechanismList.add(Mechanism.fromJson(jsonDecode(element), account));
-        } else  if (element is Map<String, dynamic>) {
+        } else if (element is Map<String, dynamic>) {
           mechanismList.add(Mechanism.fromJson(element, account));
         } else {
           var tmp = Map<String, dynamic>.from(element);
@@ -68,7 +78,7 @@ class Account {
   /// Creates a JSON string representation of [Account] object.
   Map<String, dynamic> toJson() {
     List<String> list = [];
-    if(mechanismList != null) {
+    if (mechanismList != null) {
       for (final element in mechanismList!) {
         list.add(jsonEncode(element.toJson()));
       }
@@ -89,7 +99,9 @@ class Account {
 
   /// Gets the name of the IDP that issued this account.
   String? getIssuer() {
-    if(this.displayIssuer != "null" && this.displayIssuer != null && this.displayIssuer!.isNotEmpty) {
+    if (this.displayIssuer != "null" &&
+        this.displayIssuer != null &&
+        this.displayIssuer!.isNotEmpty) {
       return this.displayIssuer;
     } else {
       return this.issuer;
@@ -98,7 +110,9 @@ class Account {
 
   /// Gets the name of the account.
   String? getAccountName() {
-    if(this.displayAccountName != "null" &&  this.displayAccountName != null && this.displayAccountName!.isNotEmpty) {
+    if (this.displayAccountName != "null" &&
+        this.displayAccountName != null &&
+        this.displayAccountName!.isNotEmpty) {
       return this.displayAccountName;
     } else {
       return this.accountName;
@@ -107,12 +121,12 @@ class Account {
 
   /// Gets the [OathMechanism] associated with this account.
   OathMechanism? getOathMechanism() {
-    if(mechanismList == null) {
+    if (mechanismList == null) {
       return null;
     }
 
-    for(Mechanism mechanism in mechanismList!) {
-      if(mechanism.type == Mechanism.OATH) {
+    for (Mechanism mechanism in mechanismList!) {
+      if (mechanism.type == Mechanism.OATH) {
         return mechanism as OathMechanism?;
       }
     }
@@ -126,12 +140,12 @@ class Account {
 
   /// Gets the [PushMechanism] associated with this account.
   PushMechanism? getPushMechanism() {
-    if(mechanismList == null) {
+    if (mechanismList == null) {
       return null;
     }
 
-    for(Mechanism mechanism in mechanismList!) {
-      if(mechanism.type == Mechanism.PUSH) {
+    for (Mechanism mechanism in mechanismList!) {
+      if (mechanism.type == Mechanism.PUSH) {
         return mechanism as PushMechanism?;
       }
     }
@@ -150,5 +164,4 @@ class Account {
 
   /// Creates a String representation of [Account] object.
   String toString() => jsonEncode(toJson());
-
 }
