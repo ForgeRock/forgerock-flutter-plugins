@@ -6,9 +6,7 @@
  */
 
 /// The supported Push types.
-enum PushType {
-  DEFAULT, CHALLENGE, BIOMETRIC
-}
+enum PushType { DEFAULT, CHALLENGE, BIOMETRIC }
 
 /// Helper extension for PushType.
 extension PushTypeExtension on PushType {

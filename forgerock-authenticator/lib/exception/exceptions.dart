@@ -9,7 +9,8 @@
 class DuplicateMechanismException implements Exception {
   late String _message;
 
-  DuplicateMechanismException([String message = 'This authentication method is already registered.']) {
+  DuplicateMechanismException(
+      [String message = 'This authentication method is already registered.']) {
     this._message = message;
   }
 
@@ -24,7 +25,7 @@ class MechanismCreationException implements Exception {
   late String _message;
 
   MechanismCreationException([String? message]) {
-    if(message != null) {
+    if (message != null) {
       this._message = 'Error registering new MFA account:\n $message';
     } else {
       this._message = 'Error registering new MFA account.';
@@ -42,8 +43,9 @@ class HandleNotificationException implements Exception {
   late String _message;
 
   HandleNotificationException([String? message]) {
-    if(message != null) {
-      this._message = 'Error processing Push Authentication request:\n $message';
+    if (message != null) {
+      this._message =
+          'Error processing Push Authentication request:\n $message';
     } else {
       this._message = 'Error processing Push Authentication request.';
     }

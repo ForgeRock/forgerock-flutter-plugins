@@ -42,7 +42,7 @@ This project is provided as a Flutter plugin, a specialized package that include
 ```groovy
 dependencies:
     dependencies:
-      forgerock_authenticator:^1.1.0
+      forgerock_authenticator:^1.1.1
 ```
 
 ## Getting Started

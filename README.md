@@ -32,7 +32,7 @@ These are the available plugins in this repository.
 * ForgeRock Identity Platform
     * Access Management (AM) 6.5.2
 * Android API level 23+
-* iOS 11 and above
+* iOS 12 and above
 * Flutter SDK 2.10.x and above
 
 ## Documentation

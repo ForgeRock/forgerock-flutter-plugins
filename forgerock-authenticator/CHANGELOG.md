@@ -1,4 +1,10 @@
-# Version 1.1.0
+# Version 1.1.1
+
+## [1.1.1]
+
+#### Updated
+
+- iOS `forgerock-authenticator` dependency to the latest 3.4.1 release.
 
 ## [1.1.0]
 
