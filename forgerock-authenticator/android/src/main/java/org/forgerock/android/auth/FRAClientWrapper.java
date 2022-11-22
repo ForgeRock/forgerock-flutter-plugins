@@ -207,6 +207,11 @@ public class FRAClientWrapper {
         }
     }
 
+    public void removeAllNotifications(Result flutterResult) {
+        storageClient.removeAllNotifications();
+        flutterResult.success(true);
+    }
+
     public void getOathTokenCode(String mechanismId, Result flutterResult) {
         OathMechanism oathMechanism = (OathMechanism)storageClient.getMechanism(mechanismId);
 

@@ -175,6 +175,10 @@ open class FRAClientWrapper {
         }
     }
 
+    func removeAllNotifications(result: @escaping FlutterResult) {
+        result(storageClient.removeAllNotifications())
+    }
+    
     func getNotificationByMessageId(messageId: String) -> PushNotification? {
         NSLog("Looking for:  \(messageId)")
         let notificationList = FRAClient.shared?.getAllNotifications()

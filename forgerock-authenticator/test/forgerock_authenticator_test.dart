@@ -89,6 +89,14 @@ void main() {
     ]);
   });
 
+  test('removeAllNotifications', () async {
+    expect(await ForgerockAuthenticator.removeAllNotifications(), isTrue);
+    expect(methodCallLog, hasLength(1));
+    expect(methodCallLog, <Matcher>[
+      isMethodCall('removeAllNotifications', arguments: null)
+    ]);
+  });
+
   test('getOathTokenCode', () async {
     expect(await ForgerockAuthenticator.getOathTokenCode("issuer1-user1"), isA<OathTokenCode>());
     expect(methodCallLog, hasLength(1));
@@ -276,6 +284,7 @@ void setupForgerockAuthenticatorMocks() {
       case 'updateAccount':
       case 'removeAccount':
       case 'removeMechanism':
+      case 'removeAllNotifications':
       case 'hasAlreadyLaunched':
       case 'enableScreenshot':
       case 'disableScreenshot':

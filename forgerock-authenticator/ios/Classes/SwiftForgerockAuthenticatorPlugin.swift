@@ -131,6 +131,9 @@ public class SwiftForgerockAuthenticatorPlugin: NSObject, FlutterPlugin, UNUserN
                 result(FlutterError(code: "PLATAFORM_ARGUMENT_EXCEPTION", message: "iOS could not recognize flutter arguments in method: (getNotification)", details: nil))
             }
             
+        case "removeAllNotifications":
+            FRAClientWrapper.shared.removeAllNotifications(result: result)
+            
         case "getPendingNotificationsCount":
             FRAClientWrapper.shared.getPendingNotificationsCount(result: result)
 
