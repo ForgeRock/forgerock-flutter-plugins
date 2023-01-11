@@ -80,13 +80,18 @@ class FRAppDelegate: NSObject, UIApplicationDelegate, FlutterStreamHandler {
         NSLog("applicationWillEnterForeground:")
     }
     
-    func applicationDidEnterBackground(_ application: UIApplication) {
-        NSLog("applicationDidEnterBackground:")
-    }
-    
     func applicationDidBecomeActive(_ application: UIApplication) {
         NSLog("applicationDidBecomeActive:")
         self.processPendingDeliveredNotifications()
+    }
+    
+    func applicationWillResignActive(_ application: UIApplication) {
+        NSLog("applicationWillResignActive:")
+        FRAClientWrapper.shared.updatePendingNotificationsCount()
+    }
+    
+    func applicationDidEnterBackground(_ application: UIApplication) {
+        NSLog("applicationDidEnterBackground:")
     }
     
     func application(_ application: UIApplication, didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data) {

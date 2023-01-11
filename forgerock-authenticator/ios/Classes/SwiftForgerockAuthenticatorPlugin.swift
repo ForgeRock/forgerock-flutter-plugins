@@ -324,6 +324,10 @@ public class SwiftForgerockAuthenticatorPlugin: NSObject, FlutterPlugin, UNUserN
     public func application(_ application: UIApplication, continue userActivity: NSUserActivity, restorationHandler: @escaping ([Any]) -> Void) -> Bool {
         return FRAppDelegate.shared.application(application, continue: userActivity, restorationHandler: restorationHandler as! ([UIUserActivityRestoring]?) -> Void)
     }
+    
+    public func applicationWillResignActive(_ application: UIApplication) {
+        FRAppDelegate.shared.applicationWillResignActive(application)
+    }
 
     public func applicationDidEnterBackground(_ application: UIApplication) {
         FRAppDelegate.shared.applicationDidEnterBackground(application)
