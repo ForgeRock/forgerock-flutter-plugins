@@ -111,6 +111,10 @@ public class ForgerockAuthenticatorPlugin implements FlutterPlugin, MethodCallHa
         this.fraClientWrapper.removeMechanism(mechanismUID, result);
         break;
       }
+      case "removeAllNotifications": {
+        this.fraClientWrapper.removeAllNotifications(result);
+        break;
+      }
       case "getNotificationsByAccountId": {
         String accountId = call.argument("accountId");
         this.fraClientWrapper.getAllNotificationsByAccountId(accountId, result);

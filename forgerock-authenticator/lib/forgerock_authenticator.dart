@@ -108,6 +108,11 @@ class ForgerockAuthenticator {
     return await _channel.invokeMethod('removeMechanism', params);
   }
 
+  /// Removed all [PushNotification] data from the secured storage.
+  static Future removeAllNotifications() async {
+    return await _channel.invokeMethod('removeAllNotifications');
+  }
+
   /// Generates a new set of codes for the [OathMechanism] which id was passed in.
   /// Returns an [OathTokenCode] object that contains the currently active token code.
   static Future<OathTokenCode?> getOathTokenCode(String? mechanismId) async {

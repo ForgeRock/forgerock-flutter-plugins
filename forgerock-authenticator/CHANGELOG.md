@@ -1,4 +1,11 @@
-# Version 1.1.1
+# Version 1.1.2
+
+## [1.1.2]
+
+#### Updated
+
+- Performance improvements [SDKS-2194]
+- Bugfix related to notification sticker on the app's icon in iOS [SDKS-2300]
 
 ## [1.1.1]
 

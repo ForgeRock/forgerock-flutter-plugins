@@ -175,6 +175,10 @@ open class FRAClientWrapper {
         }
     }
 
+    func removeAllNotifications(result: @escaping FlutterResult) {
+        result(storageClient.removeAllNotifications())
+    }
+    
     func getNotificationByMessageId(messageId: String) -> PushNotification? {
         NSLog("Looking for:  \(messageId)")
         let notificationList = FRAClient.shared?.getAllNotifications()
@@ -346,6 +350,8 @@ open class FRAClientWrapper {
             startSDK(result: nil)
         }
         
+        NSLog("Updating pending PushNotification count...")
+        
         var count : Int = 0
 
         let notificationList = FRAClient.shared?.getAllNotifications()
@@ -361,7 +367,7 @@ open class FRAClientWrapper {
         return count
     }
     
-    func updatePendingNotificationsCount() {
+    open func updatePendingNotificationsCount() {
         UIApplication.shared.applicationIconBadgeNumber = pendingNotificationsCount()
     }
 
