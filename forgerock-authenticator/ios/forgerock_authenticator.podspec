@@ -4,7 +4,7 @@
 #
 Pod::Spec.new do |s|
   s.name             = 'forgerock_authenticator'
-  s.version          = '1.1.1'
+  s.version          = '1.1.2'
   s.summary          = 'ForgeRock Authenticator Plugin'
   s.description      = <<-DESC
   ForgeRock Authenticator plugin allows you to build the power of the official ForgeRock Authenticator application into your own Flutter app.
