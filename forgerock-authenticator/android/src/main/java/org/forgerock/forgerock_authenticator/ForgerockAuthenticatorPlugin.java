@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 ForgeRock. All rights reserved.
+ * Copyright (c) 2022-2023 ForgeRock. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
@@ -7,16 +7,13 @@
 
 package org.forgerock.forgerock_authenticator;
 
-import android.app.Activity;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.os.Build;
 import android.util.Log;
 import android.view.WindowManager;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.RequiresApi;
 import androidx.fragment.app.FragmentActivity;
 
 import org.forgerock.android.auth.FRAClientWrapper;
@@ -71,7 +68,6 @@ public class ForgerockAuthenticatorPlugin implements FlutterPlugin, MethodCallHa
     eventChannel.setStreamHandler(this);
   }
 
-  @RequiresApi(api = Build.VERSION_CODES.M)
   @Override
   public void onMethodCall(@NonNull MethodCall call, @NonNull Result result) {
     switch (call.method) {
@@ -104,6 +100,17 @@ public class ForgerockAuthenticatorPlugin implements FlutterPlugin, MethodCallHa
       case "removeAccount": {
         String accountId = call.argument("accountId");
         this.fraClientWrapper.removeAccount(accountId, result);
+        break;
+      }
+      case "lockAccount": {
+        String accountId = call.argument("accountId");
+        String policyName = call.argument("policyName");
+        this.fraClientWrapper.lockAccount(accountId, policyName, result);
+        break;
+      }
+      case "unlockAccount": {
+        String accountId = call.argument("accountId");
+        this.fraClientWrapper.unlockAccount(accountId, result);
         break;
       }
       case "removeMechanism": {

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 ForgeRock. All rights reserved.
+ * Copyright (c) 2022-2023 ForgeRock. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
@@ -23,6 +23,9 @@ class Account {
   String? imageURL;
   String? backgroundColor;
   int? timeAdded;
+  String? policies;
+  String? lockingPolicy;
+  bool? lock;
   List<Mechanism>? mechanismList;
 
   /// Creates Account object with given information.
@@ -35,6 +38,9 @@ class Account {
       this.imageURL,
       this.backgroundColor,
       this.timeAdded,
+      this.policies,
+      this.lockingPolicy,
+      this.lock,
       [this.mechanismList]);
 
   /// Deserializes the specified Json into an object of the [Account] object.
@@ -48,7 +54,11 @@ class Account {
         json['displayAccountName'],
         json['imageURL'] == 'null' ? null : json['imageURL'],
         json['backgroundColor'] == 'null' ? null : json['backgroundColor'],
-        json['timeAdded']);
+        json['timeAdded'],
+        json['policies'],
+        json['lockingPolicy'],
+        json['lock'] == null ? false : json['lock']
+    );
 
     if (json['mechanismList'] != null) {
       List? toParseList;
@@ -92,6 +102,9 @@ class Account {
       'imageURL': imageURL,
       'backgroundColor': backgroundColor,
       'timeAdded': timeAdded,
+      'policies': policies,
+      'lockingPolicy': lockingPolicy,
+      'lock': lock,
       'mechanismList': list
     };
     return jsonMap;

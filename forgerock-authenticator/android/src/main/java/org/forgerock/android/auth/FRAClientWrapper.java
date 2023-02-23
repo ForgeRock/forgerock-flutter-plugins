@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 ForgeRock. All rights reserved.
+ * Copyright (c) 2022-2023 ForgeRock. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
@@ -21,10 +21,13 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.messaging.FirebaseMessaging;
 
+import org.forgerock.android.auth.exception.AccountLockException;
 import org.forgerock.android.auth.exception.AuthenticatorException;
 import org.forgerock.android.auth.exception.DuplicateMechanismException;
 import org.forgerock.android.auth.exception.InvalidNotificationException;
+import org.forgerock.android.auth.exception.InvalidPolicyException;
 import org.forgerock.android.auth.exception.OathMechanismException;
+import org.forgerock.android.auth.policy.FRAPolicy;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -44,12 +47,18 @@ public class FRAClientWrapper {
     private final Context context;
     private final FRAStorageClient storageClient;
     private FRAClient fraClient;
+    private FRAPolicyEvaluator policyEvaluator;
     private String fcmToken;
     private MethodChannel channel;
 
     private FRAClientWrapper(Context context) {
         this.context = context;
         this.storageClient = new FRAStorageClient(context);
+        try {
+            this.policyEvaluator = FRAPolicyEvaluator.builder().build();
+        } catch (InvalidPolicyException e) {
+            Log.e(TAG, "Error building Policy evaluator.", e);
+        }
     }
 
     public static FRAClientWrapper getInstance() {
@@ -86,6 +95,7 @@ public class FRAClientWrapper {
                 fraClient = FRAClient.builder()
                         .withContext(context)
                         .withStorage(storageClient)
+                        .withPolicyEvaluator(policyEvaluator)
                         .start();
             }
         } catch (AuthenticatorException e) {
@@ -99,6 +109,7 @@ public class FRAClientWrapper {
             fraClient = FRAClient.builder()
                     .withContext(context)
                     .withStorage(storageClient)
+                    .withPolicyEvaluator(policyEvaluator)
                     .start();
 
             // Retrieve the FCM token
@@ -165,8 +176,11 @@ public class FRAClientWrapper {
                 new Handler(Looper.getMainLooper()).post(new Runnable() {
                     @Override
                     public void run() {
-                        if(e instanceof DuplicateMechanismException)  {
+                        if (e instanceof DuplicateMechanismException)  {
                             flutterResult.error("DUPLICATE_MECHANISM_EXCEPTION", e.getLocalizedMessage(), ((DuplicateMechanismException) e).getCausingMechanism().toJson());
+                        } else if (e.getLocalizedMessage().contains("It violates the following policy")) {
+                            // TODO: Improve it before SDK 4.0 release, throw a new PolicyViolationException in SDK
+                            flutterResult.error("POLICY_VIOLATION_EXCEPTION", e.getLocalizedMessage(), null);
                         } else {
                             flutterResult.error("CREATE_MECHANISM_EXCEPTION", e.getLocalizedMessage(), null);
                         }
@@ -198,6 +212,33 @@ public class FRAClientWrapper {
         }
     }
 
+    public void lockAccount(String accountId, String policyName, Result flutterResult) {
+        Account account = storageClient.getAccount(accountId);
+        FRAPolicy fraPolicy = getPolicyByName(policyName);
+        try {
+            if (account != null && fraPolicy != null) {
+                flutterResult.success(fraClient.lockAccount(account, fraPolicy));
+            } else {
+                flutterResult.error("ACCOUNT_LOCK_EXCEPTION", "Error locking the account: Invalid parameters.", null);
+            }
+        } catch (AccountLockException e) {
+            flutterResult.error("ACCOUNT_LOCK_EXCEPTION", e.getLocalizedMessage(), null);
+        }
+    }
+
+    public void unlockAccount(String accountId, Result flutterResult) {
+        Account account = storageClient.getAccount(accountId);
+        try {
+            if (account != null) {
+                flutterResult.success(fraClient.unlockAccount(account));
+            } else {
+                flutterResult.error("ACCOUNT_LOCK_EXCEPTION", "Error unlocking the account: Invalid parameters.", null);
+            }
+        } catch (AccountLockException e) {
+            flutterResult.error("ACCOUNT_LOCK_EXCEPTION", e.getLocalizedMessage(), null);
+        }
+    }
+
     public void removeMechanism(String mechanismUID, Result flutterResult) {
         Mechanism mechanism = storageClient.getMechanismByUUID(mechanismUID);
         if (mechanism != null) {
@@ -220,6 +261,8 @@ public class FRAClientWrapper {
                 flutterResult.success(oathMechanism.getOathTokenCode().toJson());
             } catch (OathMechanismException e) {
                 flutterResult.error("OATH_MECHANISM_EXCEPTION", e.getLocalizedMessage(), oathMechanism.toJson());
+            } catch (AccountLockException e) {
+                flutterResult.error("ACCOUNT_LOCK_EXCEPTION", e.getLocalizedMessage(), null);
             }
         }
     }
@@ -355,7 +398,6 @@ public class FRAClientWrapper {
         }
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.M)
     public void performPushAuthenticationWithBiometric(String notificationId,
                                                        String title,
                                                        boolean allowDeviceCredentials,
@@ -393,12 +435,26 @@ public class FRAClientWrapper {
                 new Handler(Looper.getMainLooper()).post(new Runnable() {
                     @Override
                     public void run() {
-                        flutterResult.error("HANDLE_NOTIFICATION_EXCEPTION",
-                                e.getLocalizedMessage(), pushNotification.toJson());
+                        if (e instanceof AccountLockException) {
+                            flutterResult.error("ACCOUNT_LOCK_EXCEPTION",
+                                    e.getLocalizedMessage(), pushNotification.toJson());
+                        } else {
+                            flutterResult.error("HANDLE_NOTIFICATION_EXCEPTION",
+                                    e.getLocalizedMessage(), pushNotification.toJson());
+                        }
                     }
                 });
             }
         };
+    }
+
+    private FRAPolicy getPolicyByName(String policyName) {
+        for (FRAPolicy policy : policyEvaluator.getPolicies()) {
+            if (policy.getName().equals(policyName)) {
+                return policy;
+            }
+        }
+        return null;
     }
 
     //
@@ -421,7 +477,6 @@ public class FRAClientWrapper {
         } else {
             flutterResult.success(false);
         }
-
     }
 
     public void getStoredMechanism(String mechanismId, Result flutterResult) {

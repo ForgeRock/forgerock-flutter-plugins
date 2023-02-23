@@ -13,7 +13,7 @@ open class FRAClientWrapper {
     public static let shared = FRAClientWrapper()
     
     let storageClient = FRAStorageClient()
-            
+    let policyEvaluator = FRAPolicyEvaluator()
     
     //MARK: - Handle SDK methods
     
@@ -21,6 +21,7 @@ open class FRAClientWrapper {
         do {
             if(FRAClient.shared == nil) {
                 try FRAClient.setStorage(storage: storageClient)
+                try FRAClient.setPolicyEvaluator(policyEvaluator: policyEvaluator)
                 FRAClient.start()
                 NSLog("ForgeRock Authenticator SDK started")
             }
@@ -70,12 +71,12 @@ open class FRAClientWrapper {
 
     func updateAccount(json: String, result: @escaping FlutterResult) {
         do {
-            let account = try AccountConverter.fromJson(json: json)
-            if (account != nil) {
-                result(FRAClient.shared?.updateAccount(account:account!))
-            } else {
-                result(false);
+            if let account = try AccountConverter.fromJson(json: json) {
+                let success = try FRAClient.shared?.updateAccount(account:account)
+                result(success)
             }
+        } catch AccountError.accountLocked(let param) {
+            result(FlutterError(code: "ACCOUNT_LOCK_EXCEPTION", message: "This account is locked. It violates the following policy: (\(param))", details: nil))
         } catch {
             result(false);
         }
@@ -115,13 +116,15 @@ open class FRAClientWrapper {
             return
         }
 
-        var oathTokenCode : OathTokenCode?
         if mechanism is TOTPMechanism, let totp = mechanism as? TOTPMechanism {
-            oathTokenCode = try? totp.generateCode()            
+            if let oathTokenCode = try? totp.generateCode() {
+                result(OathTokenCodeConverter.toJson(token: oathTokenCode))
+            }
         } else if mechanism is HOTPMechanism, let hotp = mechanism as? HOTPMechanism {
-            oathTokenCode = try? hotp.generateCode()
+            if let oathTokenCode = try? hotp.generateCode() {
+                result(OathTokenCodeConverter.toJson(token: oathTokenCode))
+            }
         }
-        result(OathTokenCodeConverter.toJson(token: oathTokenCode!))
     }
 
     func getAllNotificationsByAccountId(accountId: String, result: @escaping FlutterResult) {
@@ -167,9 +170,8 @@ open class FRAClientWrapper {
 
 
     func getNotification(notificationIdentifier: String, result: @escaping FlutterResult) {
-        let notification = FRAClient.shared?.getNotification(identifier: notificationIdentifier)
-        if (notification != nil) {
-            result(notification?.toJson())
+        if let notification = FRAClient.shared?.getNotification(identifier: notificationIdentifier) {
+            result(notification.toJson())
         } else {
             result(nil);
         }
@@ -267,12 +269,12 @@ open class FRAClientWrapper {
 
         if(accept) {
             pushNotification?.accept {
-                if (result != nil) {
-                    result!(true)
+                if let result {
+                    result(true)
                 }
             } onError: { (error) in
-                if (result != nil) {
-                    result!(FlutterError(code: "HANDLE_NOTIFICATION_EXCEPTION", message: error.localizedDescription, details: nil))
+                if let result {
+                    result(FlutterError(code: "HANDLE_NOTIFICATION_EXCEPTION", message: error.localizedDescription, details: nil))
                 }
             }
         } else {
@@ -288,9 +290,9 @@ open class FRAClientWrapper {
         if(accept) {
             pushNotification?.accept(
             challengeResponse: challengeResponse,
-            onSuccess:{
-                if (result != nil) {
-                    result!(true)
+            onSuccess: {
+                if let result {
+                    result(true)
                 }
             },
             onError: { (error) in
@@ -313,13 +315,13 @@ open class FRAClientWrapper {
             title: title,
             allowDeviceCredentials: allowDeviceCredentials,
             onSuccess: {
-                if (result != nil) {
-                    result!(true)
+                if let result {
+                    result(true)
                 }
             },
             onError: { (error) in
-                if (result != nil) {
-                    result!(FlutterError(code: "HANDLE_NOTIFICATION_EXCEPTION", message: error.localizedDescription, details: nil))
+                if let result {
+                    result(FlutterError(code: "HANDLE_NOTIFICATION_EXCEPTION", message: error.localizedDescription, details: nil))
                 }
             })
         } else {
@@ -331,12 +333,12 @@ open class FRAClientWrapper {
 
     private func denyPushNotification(pushNotification: PushNotification?, result: FlutterResult?) {
         pushNotification?.deny {
-            if (result != nil) {
-                result!(true)
+            if let result {
+                result(true)
             }
         } onError: { (error) in
-            if (result != nil) {
-                result!(FlutterError(code: "HANDLE_NOTIFICATION_EXCEPTION", message: error.localizedDescription, details: nil))
+            if let result {
+                result(FlutterError(code: "HANDLE_NOTIFICATION_EXCEPTION", message: error.localizedDescription, details: nil))
             }
         }
     }
@@ -354,13 +356,13 @@ open class FRAClientWrapper {
         
         var count : Int = 0
 
-        let notificationList = FRAClient.shared?.getAllNotifications()
-        
-        for notification in notificationList! {
-            if(notification.isPending && !notification.isExpired) {
-                count += 1
-            } else {
-                return count
+        if let notificationList = FRAClient.shared?.getAllNotifications() {
+            for notification in notificationList {
+                if(notification.isPending && !notification.isExpired) {
+                    count += 1
+                } else {
+                    return count
+                }
             }
         }
 
@@ -397,9 +399,8 @@ open class FRAClientWrapper {
     
     func setStoredAccount(json: String, result: @escaping FlutterResult) {
         do {
-            let account = try AccountConverter.fromJson(json: json)
-            if (account != nil) {
-                result(storageClient.setAccount(account:account!))
+            if let account = try AccountConverter.fromJson(json: json) {
+                result(storageClient.setAccount(account:account))
             } else {
                 result(false);
             }
@@ -409,9 +410,8 @@ open class FRAClientWrapper {
     }
     
     func getStoredMechanism(mechanismIdentifier: String, result: @escaping FlutterResult) {
-        let mechanism = storageClient.getMechanism(mechanismIdentifier: mechanismIdentifier)
-        if (mechanism != nil) {
-            let convertedMechanism = MechanismConverter.toJson(mechanism: mechanism!)
+        if let mechanism = storageClient.getMechanism(mechanismIdentifier: mechanismIdentifier) {
+            let convertedMechanism = MechanismConverter.toJson(mechanism: mechanism)
             result(convertedMechanism)
         } else {
             result(nil);
@@ -420,9 +420,8 @@ open class FRAClientWrapper {
     
     func setStoredMechanism(json: String, result: @escaping FlutterResult) {
         do {
-            let mechanism = try MechanismConverter.fromJson(json: json)
-            if (mechanism != nil) {
-                result(storageClient.setMechanism(mechanism:mechanism!))
+            if let mechanism = try MechanismConverter.fromJson(json: json) {
+                result(storageClient.setMechanism(mechanism:mechanism))
             } else {
                 result(false);
             }
@@ -432,9 +431,8 @@ open class FRAClientWrapper {
     }
     
     func getStoredNotification(notificationIdentifier: String, result: @escaping FlutterResult) {
-        let notification = storageClient.getNotification(notificationIdentifier: notificationIdentifier)
-        if (notification != nil) {
-            result(notification?.toJson)
+        if let notification = storageClient.getNotification(notificationIdentifier: notificationIdentifier) {
+            result(notification.toJson)
         } else {
             result(nil);
         }
@@ -442,9 +440,8 @@ open class FRAClientWrapper {
     
     func setStoredNotification(json: String, result: @escaping FlutterResult) {
         do {
-            let notification = try PushNotificationConverter.fromJson(json: json)
-            if (notification != nil) {
-                result(storageClient.setNotification(notification: notification!))
+            if let notification = try PushNotificationConverter.fromJson(json: json) {
+                result(storageClient.setNotification(notification: notification))
             } else {
                 result(false);
             }
@@ -454,9 +451,8 @@ open class FRAClientWrapper {
     }
 
     func deleteStoredAccount(identifier: String, result: @escaping FlutterResult) {
-        let account = storageClient.getAccount(accountIdentifier: identifier)
-        if (account != nil) {
-            result(storageClient.removeAccount(account: account!))
+        if let account = storageClient.getAccount(accountIdentifier: identifier) {
+            result(storageClient.removeAccount(account: account))
         }
     }
 
