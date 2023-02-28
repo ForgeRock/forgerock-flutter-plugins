@@ -62,8 +62,9 @@ open class FRAClientWrapper {
         let accounts = FRAClient.shared?.getAllAccounts() ?? []
         var tmpAccounts: [Any] = []
         for account in accounts {
-            let convertedAccount = AccountConverter.toJson(account: account)
-            tmpAccounts.append(convertedAccount)
+            if let convertedAccount = account.toJson() {
+                tmpAccounts.append(convertedAccount)
+            }
         }
 
         result(tmpAccounts)
@@ -388,9 +389,8 @@ open class FRAClientWrapper {
     //MARK: - Datastore upgrade
 
     func getStoredAccount(accountIdentifier: String, result: @escaping FlutterResult) {
-        let account = storageClient.getAccount(accountIdentifier: accountIdentifier)
-        if (account != nil) {
-            let convertedAccount = AccountConverter.toJson(account: account!)
+        if let account = storageClient.getAccount(accountIdentifier: accountIdentifier) {
+            let convertedAccount = account.toJson()
             result(convertedAccount)
         } else {
             result(nil);

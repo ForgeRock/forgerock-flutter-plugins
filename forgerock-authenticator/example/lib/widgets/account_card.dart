@@ -64,8 +64,8 @@ class AccountCard extends StatelessWidget {
   Widget _accountDetail() {
     if (account.lock) {
       return SizedBox(
-        width: 220,
-        child: Text('Your account is locked due the following policy: ' + account.lockingPolicy,
+        width: 230,
+        child: Text('Your account is locked due the policy: ' + account.lockingPolicy,
           maxLines: 2,
           overflow: TextOverflow.ellipsis,
           textAlign: TextAlign.center,
