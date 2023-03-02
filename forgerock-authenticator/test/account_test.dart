@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 ForgeRock. All rights reserved.
+ * Copyright (c) 2022-2023 ForgeRock. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
@@ -111,7 +111,7 @@ void main() {
 
     test('returns String representation of the account', () async {
       Account account = Account.fromJson(jsonDecode(accountJson));
-      const String accountString = '{"id":"issuer1-user1","issuer":"issuer1","displayIssuer":null,"accountName":"user1","displayAccountName":null,"imageURL":"http://forgerock.com/logo.jpg","backgroundColor":"032b75","timeAdded":100000,"mechanismList":[]}';
+      const String accountString = '{"id":"issuer1-user1","issuer":"issuer1","displayIssuer":null,"accountName":"user1","displayAccountName":null,"imageURL":"http://forgerock.com/logo.jpg","backgroundColor":"032b75","timeAdded":100000,"policies":null,"lockingPolicy":null,"lock":false,"mechanismList":[]}';
       expect(account.hasOathMechanism(), false);
       expect(account.hasPushMechanism(), false);
       expect(account.toString(), accountString);

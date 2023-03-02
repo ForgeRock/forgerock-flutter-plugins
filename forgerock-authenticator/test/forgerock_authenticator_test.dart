@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 ForgeRock. All rights reserved.
+ * Copyright (c) 2022-2023 ForgeRock. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
@@ -69,6 +69,33 @@ void main() {
     expect(methodCallLog, <Matcher>[
       isMethodCall(
         'removeAccount',
+        arguments: <String, dynamic>{
+          "accountId": "issuer1-user1"
+        },
+      ),
+    ]);
+  });
+
+  test('lockAccount', () async {
+    expect(await ForgerockAuthenticator.lockAccount("issuer1-user1", "requestBiometric"), isTrue);
+    expect(methodCallLog, hasLength(1));
+    expect(methodCallLog, <Matcher>[
+      isMethodCall(
+        'lockAccount',
+        arguments: <String, dynamic>{
+          "accountId": "issuer1-user1",
+          "policyName": "requestBiometric"
+        },
+      ),
+    ]);
+  });
+
+  test('unlockAccount', () async {
+    expect(await ForgerockAuthenticator.unlockAccount("issuer1-user1"), isTrue);
+    expect(methodCallLog, hasLength(1));
+    expect(methodCallLog, <Matcher>[
+      isMethodCall(
+        'unlockAccount',
         arguments: <String, dynamic>{
           "accountId": "issuer1-user1"
         },
@@ -283,6 +310,8 @@ void setupForgerockAuthenticatorMocks() {
         return totpURI;
       case 'updateAccount':
       case 'removeAccount':
+      case 'lockAccount':
+      case 'unlockAccount':
       case 'removeMechanism':
       case 'removeAllNotifications':
       case 'hasAlreadyLaunched':

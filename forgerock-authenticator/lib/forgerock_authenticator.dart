@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 ForgeRock. All rights reserved.
+ * Copyright (c) 2022-2023 ForgeRock. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
@@ -25,6 +25,7 @@ class ForgerockAuthenticator {
   static const EventChannel _eventChannel =
       EventChannel('forgerock_authenticator/events');
 
+  static const AccountLockException = 'ACCOUNT_LOCK_EXCEPTION';
   static const AccountParsingException = 'ACCOUNT_PARSING_EXCEPTION';
   static const AuthenticatorException = 'AUTHENTICATOR_EXCEPTION';
   static const CreateMechanismException = 'CREATE_MECHANISM_EXCEPTION';
@@ -33,8 +34,9 @@ class ForgerockAuthenticator {
   static const InvalidQRcodeException = 'INVALID_QRCODE_EXCEPTION';
   static const InvalidNotificationException = 'INVALID_NOTIFICATION_EXCEPTION';
   static const OathMechanismException = 'OATH_MECHANISM_EXCEPTION';
-  static const PlatformArgumnetException = 'PLATAFORM_ARGUMENT_EXCEPTION';
+  static const PlatformArgumentException = 'PLATFORM_ARGUMENT_EXCEPTION';
   static const PushRegistrationException = 'PUSH_REGISTRATION_EXCEPTION';
+  static const PolicyViolationException = 'POLICY_VIOLATION_EXCEPTION';
 
   //
   // Authenticator SDK methods
@@ -97,6 +99,24 @@ class ForgerockAuthenticator {
       'accountId': accountId,
     };
     return await _channel.invokeMethod('removeAccount', params);
+  }
+
+  /// Lock the [Account] which id was passed in, limiting the access to all
+  /// [Mechanism] objects and any [PushNotification] objects associated with it.
+  static Future<bool?> lockAccount(String accountId, String policyName) async {
+    var params = <String, dynamic>{
+      'accountId': accountId,
+      'policyName': policyName,
+    };
+    return await _channel.invokeMethod('lockAccount', params);
+  }
+
+  /// Unlock the [Account] which id was passed in.
+  static Future<bool?> unlockAccount(String accountId) async {
+    var params = <String, dynamic>{
+      'accountId': accountId,
+    };
+    return await _channel.invokeMethod('unlockAccount', params);
   }
 
   /// Remove from the storage the [Mechanism] which id was passed in and any [PushNotification] objects
