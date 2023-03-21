@@ -26,6 +26,7 @@ import org.forgerock.android.auth.exception.AuthenticatorException;
 import org.forgerock.android.auth.exception.DuplicateMechanismException;
 import org.forgerock.android.auth.exception.InvalidNotificationException;
 import org.forgerock.android.auth.exception.InvalidPolicyException;
+import org.forgerock.android.auth.exception.MechanismPolicyViolationException;
 import org.forgerock.android.auth.exception.OathMechanismException;
 import org.forgerock.android.auth.policy.FRAPolicy;
 
@@ -177,12 +178,14 @@ public class FRAClientWrapper {
                     @Override
                     public void run() {
                         if (e instanceof DuplicateMechanismException)  {
-                            flutterResult.error("DUPLICATE_MECHANISM_EXCEPTION", e.getLocalizedMessage(), ((DuplicateMechanismException) e).getCausingMechanism().toJson());
-                        } else if (e.getLocalizedMessage().contains("It violates the following policy")) {
-                            // TODO: Improve it before SDK 4.0 release, throw a new PolicyViolationException in SDK
-                            flutterResult.error("POLICY_VIOLATION_EXCEPTION", e.getLocalizedMessage(), null);
+                            flutterResult.error("DUPLICATE_MECHANISM_EXCEPTION", e.getLocalizedMessage(),
+                                    ((DuplicateMechanismException) e).getCausingMechanism().toJson());
+                        } else if (e instanceof MechanismPolicyViolationException) {
+                            flutterResult.error("POLICY_VIOLATION_EXCEPTION", e.getLocalizedMessage(),
+                                    ((MechanismPolicyViolationException) e).getCausingPolicy().getName());
                         } else {
-                            flutterResult.error("CREATE_MECHANISM_EXCEPTION", e.getLocalizedMessage(), null);
+                            flutterResult.error("CREATE_MECHANISM_EXCEPTION", e.getLocalizedMessage(),
+                                    null);
                         }
                     }
                 });
@@ -196,10 +199,14 @@ public class FRAClientWrapper {
 
     public void updateAccount(String accountJson, Result flutterResult) {
         Account account = Account.deserialize(accountJson);
-        if (account != null) {
-            flutterResult.success(fraClient.updateAccount(account));
-        } else {
-            flutterResult.success(false);
+        try {
+            if (account != null) {
+                flutterResult.success(fraClient.updateAccount(account));
+            } else {
+                flutterResult.success(false);
+            }
+        } catch (AccountLockException e) {
+            flutterResult.error("ACCOUNT_LOCK_EXCEPTION", e.getLocalizedMessage(), null);
         }
     }
 

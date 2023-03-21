@@ -43,15 +43,15 @@ dependencies {
     implementation 'com.google.firebase:firebase-messaging:23.1.1'
     implementation 'com.google.android.gms:play-services-location:21.0.1'
 
-    implementation 'org.forgerock:forgerock-authenticator:4.0.0-beta4'
-    implementation 'org.forgerock:forgerock-core:4.0.0-beta4'
+//    implementation 'org.forgerock:forgerock-authenticator:4.0.0-beta4'
+//    implementation 'org.forgerock:forgerock-core:4.0.0-beta4'
 
     //add lib via aar-depency
-//    compile(name: 'forgerock-authenticator-debug', ext: 'aar')
-//    compile(name: 'forgerock-core-debug', ext: 'aar')
-//    implementation 'com.nimbusds:nimbus-jose-jwt:9.0.1'
-//    implementation 'com.squareup.okhttp3:okhttp:4.3.1'
-//    implementation 'com.squareup.okhttp3:logging-interceptor:4.3.1'
-//    implementation 'androidx.biometric:biometric-ktx:1.2.0-alpha04'
+    implementation(name: 'forgerock-authenticator-debug', ext: 'aar')
+    implementation(name: 'forgerock-core-debug', ext: 'aar')
+    implementation 'com.nimbusds:nimbus-jose-jwt:9.0.1'
+    implementation 'com.squareup.okhttp3:okhttp:4.3.1'
+    implementation 'com.squareup.okhttp3:logging-interceptor:4.3.1'
+    implementation 'androidx.biometric:biometric-ktx:1.2.0-alpha04'
 }
 

@@ -48,6 +48,9 @@ open class FRAClientWrapper {
             case MechanismError.alreadyExists(let message):
                 result(FlutterError(code: "DUPLICATE_MECHANISM_EXCEPTION", message: error.localizedDescription, details: message))
                 break
+            case AccountError.failToRegisterPolicyViolation(let policy):
+                result(FlutterError(code: "POLICY_VIOLATION_EXCEPTION", message: error.localizedDescription, details: policy))
+                break
             default:
                 result(FlutterError(code: "CREATE_MECHANISM_EXCEPTION", message: error.localizedDescription, details: nil))
                 break
