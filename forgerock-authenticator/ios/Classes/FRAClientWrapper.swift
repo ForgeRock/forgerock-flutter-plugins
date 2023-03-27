@@ -1,5 +1,5 @@
 //
-//  Copyright (c) 2022 ForgeRock. All rights reserved.
+//  Copyright (c) 2022-2023 ForgeRock. All rights reserved.
 //
 //  This software may be modified and distributed under the terms
 //  of the MIT license. See the LICENSE file for details.
@@ -65,7 +65,7 @@ open class FRAClientWrapper {
         let accounts = FRAClient.shared?.getAllAccounts() ?? []
         var tmpAccounts: [Any] = []
         for account in accounts {
-            if let convertedAccount = account.toJson() {
+            if let convertedAccount = AccountConverter.toJson(account: account) {
                 tmpAccounts.append(convertedAccount)
             }
         }
@@ -392,8 +392,9 @@ open class FRAClientWrapper {
     //MARK: - Datastore upgrade
 
     func getStoredAccount(accountIdentifier: String, result: @escaping FlutterResult) {
+        
         if let account = storageClient.getAccount(accountIdentifier: accountIdentifier) {
-            let convertedAccount = account.toJson()
+            let convertedAccount = AccountConverter.toJson(account: account)
             result(convertedAccount)
         } else {
             result(nil);
