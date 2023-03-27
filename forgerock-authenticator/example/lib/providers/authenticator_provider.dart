@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 ForgeRock. All rights reserved.
+ * Copyright (c) 2022-2023 ForgeRock. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
@@ -7,6 +7,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:forgerock_authenticator/exception/exceptions.dart';
 
 import 'package:forgerock_authenticator/forgerock_authenticator.dart';
 import 'package:forgerock_authenticator/models/account.dart';
@@ -51,11 +52,21 @@ class AuthenticatorProvider with ChangeNotifier {
   }
 
   Future<Mechanism> addAccount(String uri) async {
-    final Mechanism mechanism = await ForgerockAuthenticator.createMechanismFromUri(uri);
-    if (mechanism != null) {
-      getAllAccounts();
+    try {
+      final Mechanism mechanism = await ForgerockAuthenticator.createMechanismFromUri(uri);
+      if (mechanism != null) {
+        getAllAccounts();
+      }
+      return mechanism;
+    } on PlatformException catch(e) {
+      if( e.code == ForgerockAuthenticator.DuplicateMechanismException) {
+        return Future<Mechanism>.error(DuplicateMechanismException());
+      } if( e.code == ForgerockAuthenticator.CreateMechanismException) {
+        return Future<Mechanism>.error(MechanismCreationException(e.message));
+      } else {
+        return Future<Mechanism>.error(e);
+      }
     }
-    return mechanism;
   }
 
   Future<bool> removeAccount(String accountId) async {
@@ -67,25 +78,65 @@ class AuthenticatorProvider with ChangeNotifier {
   }
 
   Future<OathTokenCode> getOathTokenCode(String mechanismId) async {
-    return ForgerockAuthenticator.getOathTokenCode(mechanismId);
+    try {
+      return ForgerockAuthenticator.getOathTokenCode(mechanismId);
+    } on PlatformException catch(e) {
+      if( e.code == ForgerockAuthenticator.AccountLockException) {
+        return Future<OathTokenCode>.error(AccountLockException(e.message));
+      } else {
+        return Future<OathTokenCode>.error(e);
+      }
+    }
   }
 
   static Future<bool> performPushAuthentication(PushNotification pushNotification,
       bool accept) async {
-    return ForgerockAuthenticator.performPushAuthentication(pushNotification, accept);
+    try {
+      return ForgerockAuthenticator.performPushAuthentication(pushNotification, accept);
+    } on PlatformException catch(e) {
+      if( e.code == ForgerockAuthenticator.AccountLockException) {
+        return Future<bool>.error(AccountLockException(e.message));
+      } else if( e.code == ForgerockAuthenticator.HandleNotificationException) {
+        return Future<bool>.error(HandleNotificationException(e.message));
+      } else {
+        return Future<bool>.error(e);
+      }
+    }
   }
 
   static Future<bool> performPushAuthenticationWithChallenge(
       PushNotification pushNotification, String challengeResponse, bool accept) async {
-    return ForgerockAuthenticator.performPushAuthenticationWithChallenge(pushNotification,
-        challengeResponse, accept);
+    try {
+      return ForgerockAuthenticator.performPushAuthenticationWithChallenge(pushNotification,
+          challengeResponse, accept);
+    } on PlatformException catch(e) {
+      if( e.code == ForgerockAuthenticator.AccountLockException) {
+        return Future<bool>.error(AccountLockException(e.message));
+      } else if( e.code == ForgerockAuthenticator.HandleNotificationException) {
+        return Future<bool>.error(HandleNotificationException(e.message));
+      } else if( e.code == ForgerockAuthenticator.PolicyViolationException) {
+        return Future<bool>.error(PolicyViolationException(e.message));
+      } else {
+        return Future<bool>.error(e);
+      }
+    }
   }
 
   static Future<bool> performPushAuthenticationWithBiometric(
       PushNotification pushNotification, String title,
       bool allowDeviceCredentials, bool accept) async {
-    return ForgerockAuthenticator.performPushAuthenticationWithBiometric(pushNotification,
-        title, allowDeviceCredentials, accept);
+    try {
+      return ForgerockAuthenticator.performPushAuthenticationWithBiometric(pushNotification,
+          title, allowDeviceCredentials, accept);
+    } on PlatformException catch(e) {
+      if( e.code == ForgerockAuthenticator.AccountLockException) {
+        return Future<bool>.error(AccountLockException(e.message));
+      } else if( e.code == ForgerockAuthenticator.HandleNotificationException) {
+        return Future<bool>.error(HandleNotificationException(e.message));
+      } else {
+        return Future<bool>.error(e);
+      }
+    }
   }
 
 }

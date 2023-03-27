@@ -48,7 +48,13 @@ class FRAStorageClient implements StorageClient {
     private final HashMap<String, PushNotification> notificationMap;
 
     private static final String TAG = DefaultStorageClient.class.getSimpleName();
+    private static final int NOTIFICATIONS_MAX_SIZE = 20;
 
+    /**
+     * Constructor.
+     *
+     * @param context application context.
+     */
     public FRAStorageClient(Context context) {
         this.accountData = new SecuredSharedPreferences(context,
                 FORGEROCK_SHARED_PREFERENCES_DATA_ACCOUNT, FORGEROCK_SHARED_PREFERENCES_KEYS);
@@ -255,7 +261,8 @@ class FRAStorageClient implements StorageClient {
             Map<String,?> keys = notificationData.getAll();
             for(Map.Entry<String,?> entry : keys.entrySet()){
                 if(entry.getValue() != null) {
-                    Logger.debug(TAG, "PushNotification map values: ",entry.getKey() + ": " + entry.getValue().toString());
+                    Logger.debug(TAG, "PushNotification map values: ",
+                            entry.getKey() + ": " + entry.getValue().toString());
                     PushNotification pushNotification = PushNotification.deserialize(entry.getValue().toString());
                     if(pushNotification != null) {
                         pushNotificationList.add(pushNotification);
@@ -268,6 +275,19 @@ class FRAStorageClient implements StorageClient {
         }
 
         Collections.sort(pushNotificationList);
+        return this.removeOldNotificationEntries(pushNotificationList);
+    }
+
+    private List<PushNotification> removeOldNotificationEntries(List<PushNotification> pushNotificationList) {
+        Logger.debug(TAG, "Checking old PushNotification entries to remove...");
+        int removedEntries = 0;
+        while (pushNotificationList.size() > NOTIFICATIONS_MAX_SIZE) {
+            int lastElement = pushNotificationList.size() - 1;
+            this.removeNotification(pushNotificationList.get(lastElement));
+            pushNotificationList.remove(lastElement);
+            removedEntries++;
+        }
+        Logger.debug(TAG, removedEntries + " PushNotification entries removed.");
         return pushNotificationList;
     }
 
@@ -300,6 +320,16 @@ class FRAStorageClient implements StorageClient {
     }
 
     /**
+     * Remove all the stored {@link PushNotification}
+     */
+    public void removeAllNotifications() {
+        notificationData.edit()
+                .clear()
+                .commit();
+        notificationMap.clear();
+    }
+
+    /**
      * Get the PushNotification object with its id
      * @param notificationId The PushNotification unique ID
      * @return The PushNotification object.
@@ -325,6 +355,7 @@ class FRAStorageClient implements StorageClient {
             if(this.notificationMap.isEmpty()) {
                 this.getAllNotifications();
             }
+
             this.notificationMap.put(pushNotification.getId(), pushNotification);
         }
 

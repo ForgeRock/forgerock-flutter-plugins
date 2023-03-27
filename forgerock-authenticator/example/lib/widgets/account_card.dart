@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 ForgeRock. All rights reserved.
+ * Copyright (c) 2022-2023 ForgeRock. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
@@ -62,10 +62,22 @@ class AccountCard extends StatelessWidget {
   }
 
   Widget _accountDetail() {
-    return Container(
-      padding: const EdgeInsets.fromLTRB(5, 2, 0, 0),
-      child: AccountDetail(account),
-    );
+    if (account.lock) {
+      return SizedBox(
+        width: 230,
+        child: Text('Your account is locked due the policy: ' + account.lockingPolicy,
+          maxLines: 2,
+          overflow: TextOverflow.ellipsis,
+          textAlign: TextAlign.center,
+          style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold),
+        ),
+      );
+    } else {
+      return Container(
+        padding: const EdgeInsets.fromLTRB(5, 2, 0, 0),
+        child: AccountDetail(account),
+      );
+    }
   }
 
 }

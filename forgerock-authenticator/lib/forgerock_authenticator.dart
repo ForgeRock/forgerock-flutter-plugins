@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 ForgeRock. All rights reserved.
+ * Copyright (c) 2022-2023 ForgeRock. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
@@ -20,10 +20,12 @@ import 'models/push_notification.dart';
 /// Mobile SDK. It is the front facing class where the methods available in the SDK can be
 /// found and utilized.
 class ForgerockAuthenticator {
+  static const MethodChannel _channel =
+      MethodChannel('forgerock_authenticator');
+  static const EventChannel _eventChannel =
+      EventChannel('forgerock_authenticator/events');
 
-  static const MethodChannel _channel = MethodChannel('forgerock_authenticator');
-  static const EventChannel _eventChannel = EventChannel('forgerock_authenticator/events');
-
+  static const AccountLockException = 'ACCOUNT_LOCK_EXCEPTION';
   static const AccountParsingException = 'ACCOUNT_PARSING_EXCEPTION';
   static const AuthenticatorException = 'AUTHENTICATOR_EXCEPTION';
   static const CreateMechanismException = 'CREATE_MECHANISM_EXCEPTION';
@@ -32,8 +34,9 @@ class ForgerockAuthenticator {
   static const InvalidQRcodeException = 'INVALID_QRCODE_EXCEPTION';
   static const InvalidNotificationException = 'INVALID_NOTIFICATION_EXCEPTION';
   static const OathMechanismException = 'OATH_MECHANISM_EXCEPTION';
-  static const PlatformArgumnetException = 'PLATAFORM_ARGUMENT_EXCEPTION';
+  static const PlatformArgumentException = 'PLATFORM_ARGUMENT_EXCEPTION';
   static const PushRegistrationException = 'PUSH_REGISTRATION_EXCEPTION';
+  static const PolicyViolationException = 'POLICY_VIOLATION_EXCEPTION';
 
   //
   // Authenticator SDK methods
@@ -67,16 +70,15 @@ class ForgerockAuthenticator {
   static Future<List<Account>> getAllAccounts() async {
     try {
       List? list = await _channel.invokeMethod('getAllAccounts');
-      if(list != null && list.isNotEmpty) {
+      if (list != null && list.isNotEmpty) {
         List<Account> accounts = [];
-        for(final element in list) {
+        for (final element in list) {
           accounts.add(Account.fromJson(_getPlatformData(element)));
         }
         return accounts;
       } else {
         return List.empty();
       }
-
     } on PlatformException catch (ex) {
       throw ex;
     }
@@ -99,6 +101,24 @@ class ForgerockAuthenticator {
     return await _channel.invokeMethod('removeAccount', params);
   }
 
+  /// Lock the [Account] which id was passed in, limiting the access to all
+  /// [Mechanism] objects and any [PushNotification] objects associated with it.
+  static Future<bool?> lockAccount(String accountId, String policyName) async {
+    var params = <String, dynamic>{
+      'accountId': accountId,
+      'policyName': policyName,
+    };
+    return await _channel.invokeMethod('lockAccount', params);
+  }
+
+  /// Unlock the [Account] which id was passed in.
+  static Future<bool?> unlockAccount(String accountId) async {
+    var params = <String, dynamic>{
+      'accountId': accountId,
+    };
+    return await _channel.invokeMethod('unlockAccount', params);
+  }
+
   /// Remove from the storage the [Mechanism] which id was passed in and any [PushNotification] objects
   /// associated with it.
   static Future<bool?> removeMechanism(String mechanismUID) async {
@@ -106,6 +126,11 @@ class ForgerockAuthenticator {
       'mechanismUID': mechanismUID,
     };
     return await _channel.invokeMethod('removeMechanism', params);
+  }
+
+  /// Removed all [PushNotification] data from the secured storage.
+  static Future removeAllNotifications() async {
+    return await _channel.invokeMethod('removeAllNotifications');
   }
 
   /// Generates a new set of codes for the [OathMechanism] which id was passed in.
@@ -120,12 +145,13 @@ class ForgerockAuthenticator {
 
   /// Get the [PushNotification] object with its id. Identifier of PushNotification object is "<mechanismUUID>-<timeAdded>"
   /// Returns `null` if the notification could not be found.
-  static Future<PushNotification?> getNotification(String notificationId) async {
+  static Future<PushNotification?> getNotification(
+      String notificationId) async {
     var params = <String, dynamic>{
       'notificationId': notificationId,
     };
     var notification = await _channel.invokeMethod('getNotification', params);
-    if(notification != null) {
+    if (notification != null) {
       return PushNotification.fromJson(_getPlatformData(notification));
     } else {
       return null;
@@ -134,12 +160,13 @@ class ForgerockAuthenticator {
 
   /// Receives an APNS or FCM remote message and covert into a [PushNotification] object,
   /// which allows accept or deny Push Authentication requests.
-  static Future<PushNotification?> handleMessageWithPayload(Map<String, dynamic> userInfo) async {
+  static Future<PushNotification?> handleMessageWithPayload(
+      Map<String, dynamic> userInfo) async {
     var params = <String, dynamic>{
       'userInfo': userInfo,
     };
     var json = await _channel.invokeMethod('handleMessageWithPayload', params);
-    if(json != null) {
+    if (json != null) {
       return PushNotification.fromJson(_getPlatformData(json));
     } else {
       return null;
@@ -147,7 +174,8 @@ class ForgerockAuthenticator {
   }
 
   /// Respond a [PushType.DEFAULT] authentication request from a given [PushNotification] received from OpenAM.
-  static Future<bool?> performPushAuthentication(PushNotification pushNotification, bool accept) async {
+  static Future<bool?> performPushAuthentication(
+      PushNotification pushNotification, bool accept) async {
     String notificationId = pushNotification.id;
     var params = <String, dynamic>{
       'notificationId': notificationId,
@@ -159,22 +187,28 @@ class ForgerockAuthenticator {
   /// Respond a [PushType.CHALLENGE] authentication request from a given [PushNotification] received from OpenAM.
   ///
   /// Note: This API is available with OpenAM 7.2 and beyond
-  static Future<bool?> performPushAuthenticationWithChallenge(PushNotification pushNotification,
-      String challengeResponse, bool accept) async {
+  static Future<bool?> performPushAuthenticationWithChallenge(
+      PushNotification pushNotification,
+      String challengeResponse,
+      bool accept) async {
     String notificationId = pushNotification.id;
     var params = <String, dynamic>{
       'notificationId': notificationId,
       'challengeResponse': challengeResponse,
       'accept': accept,
     };
-    return await _channel.invokeMethod('performPushAuthenticationWithChallenge', params);
+    return await _channel.invokeMethod(
+        'performPushAuthenticationWithChallenge', params);
   }
 
   /// Respond a [PushType.BIOMETRIC] authentication request from a given [PushNotification] received from OpenAM.
   ///
   /// Note: This API is available with OpenAM 7.2 and beyond
-  static Future<bool?> performPushAuthenticationWithBiometric(PushNotification pushNotification,
-      String title, bool allowDeviceCredentials, bool accept) async {
+  static Future<bool?> performPushAuthenticationWithBiometric(
+      PushNotification pushNotification,
+      String title,
+      bool allowDeviceCredentials,
+      bool accept) async {
     String notificationId = pushNotification.id;
     var params = <String, dynamic>{
       'notificationId': notificationId,
@@ -182,27 +216,29 @@ class ForgerockAuthenticator {
       'allowDeviceCredentials': allowDeviceCredentials,
       'accept': accept,
     };
-    return await _channel.invokeMethod('performPushAuthenticationWithBiometric', params);
+    return await _channel.invokeMethod(
+        'performPushAuthenticationWithBiometric', params);
   }
 
   /// Get all of the notifications that belong to an [Account] object.
   /// Returns `null` if no [PushNotification] could be found or the accountId is invalid.
-  static Future<List<PushNotification>> getAllNotificationsByAccountId(String accountId) async {
+  static Future<List<PushNotification>> getAllNotificationsByAccountId(
+      String accountId) async {
     var params = <String, dynamic>{
       'accountId': accountId,
     };
     try {
       List? list = await _channel.invokeMethod('getAllNotifications', params);
-      if(list != null && list.isNotEmpty) {
+      if (list != null && list.isNotEmpty) {
         List<PushNotification> notifications = [];
-        for(final element in list) {
-          notifications.add(PushNotification.fromJson(_getPlatformData(element)));
+        for (final element in list) {
+          notifications
+              .add(PushNotification.fromJson(_getPlatformData(element)));
         }
         return notifications;
       } else {
         return List.empty();
       }
-
     } on PlatformException catch (ex) {
       throw ex;
     }
@@ -210,7 +246,8 @@ class ForgerockAuthenticator {
 
   /// Get the number of non-expired notifications across all mechanisms.
   static Future<int> getPendingNotificationsCount() async {
-    final int count = await _channel.invokeMethod('getPendingNotificationsCount');
+    final int count =
+        await _channel.invokeMethod('getPendingNotificationsCount');
     return count;
   }
 
@@ -218,16 +255,19 @@ class ForgerockAuthenticator {
   /// Returns `null` if no [PushNotification] could be found.
   static Future<List<PushNotification>> getAllNotifications() async {
     try {
-      var mechanismMap = await _channel.invokeMethod('getAllMechanismsGroupByUID');
+      var mechanismMap =
+          await _channel.invokeMethod('getAllMechanismsGroupByUID');
       List? list = await _channel.invokeMethod('getAllNotifications');
-      if(list != null && list.isNotEmpty) {
+      if (list != null && list.isNotEmpty) {
         List<PushNotification> notifications = [];
-        for(final element in list) {
-          PushNotification pushNotification = PushNotification.fromJson(_getPlatformData(element));
-          if(mechanismMap.isNotEmpty) {
+        for (final element in list) {
+          PushNotification pushNotification =
+              PushNotification.fromJson(_getPlatformData(element));
+          if (mechanismMap.isNotEmpty) {
             final mechanismJson = mechanismMap[pushNotification.mechanismUID];
-            if(mechanismJson != null) {
-              final pushMechanism = Mechanism.fromJson(_getPlatformData(mechanismJson));
+            if (mechanismJson != null) {
+              final pushMechanism =
+                  Mechanism.fromJson(_getPlatformData(mechanismJson));
               pushNotification.setMechanism(pushMechanism as PushMechanism?);
               notifications.add(pushNotification);
             }
@@ -237,19 +277,18 @@ class ForgerockAuthenticator {
       } else {
         return List.empty();
       }
-
     } on PlatformException catch (ex) {
       throw ex;
     }
   }
-
 
   //
   // App helper methods
   //
 
   /// Indicates if the app was ever launched before.
-  static Future<bool?> hasAlreadyLaunched() =>  _channel.invokeMethod<bool?>('hasAlreadyLaunched');
+  static Future<bool?> hasAlreadyLaunched() =>
+      _channel.invokeMethod<bool?>('hasAlreadyLaunched');
 
   /// Disable screenshoot capture on Android devices.
   static Future<bool?> disableScreenshot() async {
@@ -275,21 +314,21 @@ class ForgerockAuthenticator {
   }
 
   static _getPlatformData(element) {
-    if(element == null) {
+    if (element == null) {
       return null;
-    } else if(element is String) {
+    } else if (element is String) {
       return jsonDecode(element);
     } else {
       return Map<String, dynamic>.from(element);
     }
   }
 
-
   //
   // Deep Link methods
   //
 
-  static Future<String?> getInitialLink() =>  _channel.invokeMethod<String?>('getInitialLink');
+  static Future<String?> getInitialLink() =>
+      _channel.invokeMethod<String?>('getInitialLink');
 
   static late final Stream<String?> linkStream = _eventChannel
       .receiveBroadcastStream()
@@ -312,5 +351,4 @@ class ForgerockAuthenticator {
       },
     ),
   );
-
 }

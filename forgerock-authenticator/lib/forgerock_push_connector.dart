@@ -11,7 +11,6 @@ import 'package:flutter/services.dart';
 /// The [ForgerockPushConnector] fires notifications whenever an APNS/FCM token
 /// are generated and a remote message is received.
 class ForgerockPushConnector {
-
   final MethodChannel _channel = const MethodChannel('forgerock_authenticator');
 
   /// Last pending push message.
@@ -50,5 +49,4 @@ class ForgerockPushConnector {
         throw UnsupportedError('Unrecognized JSON message');
     }
   }
-
 }

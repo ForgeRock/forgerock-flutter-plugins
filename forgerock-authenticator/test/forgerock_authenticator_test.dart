@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 ForgeRock. All rights reserved.
+ * Copyright (c) 2022-2023 ForgeRock. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
@@ -76,6 +76,33 @@ void main() {
     ]);
   });
 
+  test('lockAccount', () async {
+    expect(await ForgerockAuthenticator.lockAccount("issuer1-user1", "requestBiometric"), isTrue);
+    expect(methodCallLog, hasLength(1));
+    expect(methodCallLog, <Matcher>[
+      isMethodCall(
+        'lockAccount',
+        arguments: <String, dynamic>{
+          "accountId": "issuer1-user1",
+          "policyName": "requestBiometric"
+        },
+      ),
+    ]);
+  });
+
+  test('unlockAccount', () async {
+    expect(await ForgerockAuthenticator.unlockAccount("issuer1-user1"), isTrue);
+    expect(methodCallLog, hasLength(1));
+    expect(methodCallLog, <Matcher>[
+      isMethodCall(
+        'unlockAccount',
+        arguments: <String, dynamic>{
+          "accountId": "issuer1-user1"
+        },
+      ),
+    ]);
+  });
+
   test('removeMechanism', () async {
     expect(await ForgerockAuthenticator.removeMechanism("c112b325-ac22-37f1-aae6-c12cf411cf80"), isTrue);
     expect(methodCallLog, hasLength(1));
@@ -86,6 +113,14 @@ void main() {
           "mechanismUID": "c112b325-ac22-37f1-aae6-c12cf411cf80"
         },
       ),
+    ]);
+  });
+
+  test('removeAllNotifications', () async {
+    expect(await ForgerockAuthenticator.removeAllNotifications(), isTrue);
+    expect(methodCallLog, hasLength(1));
+    expect(methodCallLog, <Matcher>[
+      isMethodCall('removeAllNotifications', arguments: null)
     ]);
   });
 
@@ -275,7 +310,10 @@ void setupForgerockAuthenticatorMocks() {
         return totpURI;
       case 'updateAccount':
       case 'removeAccount':
+      case 'lockAccount':
+      case 'unlockAccount':
       case 'removeMechanism':
+      case 'removeAllNotifications':
       case 'hasAlreadyLaunched':
       case 'enableScreenshot':
       case 'disableScreenshot':

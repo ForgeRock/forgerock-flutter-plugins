@@ -27,20 +27,21 @@ class OathTokenCode {
   /// Deserializes the specified JSON into an [OathTokenCode] object.
   factory OathTokenCode.fromJson(Map<String, dynamic>? json) {
     String type = json?['oathType'];
-    var oathType = type.toUpperCase() == 'HOTP' ? TokenType.HOTP : TokenType.TOTP;
+    var oathType =
+        type.toUpperCase() == 'HOTP' ? TokenType.HOTP : TokenType.TOTP;
 
-    return OathTokenCode(json?['code'], json?['start'], json?['until'], oathType);
+    return OathTokenCode(
+        json?['code'], json?['start'], json?['until'], oathType);
   }
 
   /// Creates a JSON string representation of [OathTokenCode] object.
   Map<String, dynamic> toJson() => {
-    'code': code,
-    'start': start,
-    'until': until,
-    'oathType': oathType == TokenType.HOTP ? 'HOTP' : 'TOTP'
-  };
+        'code': code,
+        'start': start,
+        'until': until,
+        'oathType': oathType == TokenType.HOTP ? 'HOTP' : 'TOTP'
+      };
 
   /// Creates a String representation of [OathTokenCode] object.
   String toString() => jsonEncode(toJson());
-
 }

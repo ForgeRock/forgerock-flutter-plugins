@@ -131,6 +131,9 @@ public class SwiftForgerockAuthenticatorPlugin: NSObject, FlutterPlugin, UNUserN
                 result(FlutterError(code: "PLATAFORM_ARGUMENT_EXCEPTION", message: "iOS could not recognize flutter arguments in method: (getNotification)", details: nil))
             }
             
+        case "removeAllNotifications":
+            FRAClientWrapper.shared.removeAllNotifications(result: result)
+            
         case "getPendingNotificationsCount":
             FRAClientWrapper.shared.getPendingNotificationsCount(result: result)
 
@@ -320,6 +323,10 @@ public class SwiftForgerockAuthenticatorPlugin: NSObject, FlutterPlugin, UNUserN
     
     public func application(_ application: UIApplication, continue userActivity: NSUserActivity, restorationHandler: @escaping ([Any]) -> Void) -> Bool {
         return FRAppDelegate.shared.application(application, continue: userActivity, restorationHandler: restorationHandler as! ([UIUserActivityRestoring]?) -> Void)
+    }
+    
+    public func applicationWillResignActive(_ application: UIApplication) {
+        FRAppDelegate.shared.applicationWillResignActive(application)
     }
 
     public func applicationDidEnterBackground(_ application: UIApplication) {

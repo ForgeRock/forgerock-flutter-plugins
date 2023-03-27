@@ -1,5 +1,5 @@
 //
-//  Copyright (c) 2022 ForgeRock. All rights reserved.
+//  Copyright (c) 2022-2023 ForgeRock. All rights reserved.
 //
 //  This software may be modified and distributed under the terms
 //  of the MIT license. See the LICENSE file for details.
@@ -80,13 +80,18 @@ class FRAppDelegate: NSObject, UIApplicationDelegate, FlutterStreamHandler {
         NSLog("applicationWillEnterForeground:")
     }
     
-    func applicationDidEnterBackground(_ application: UIApplication) {
-        NSLog("applicationDidEnterBackground:")
-    }
-    
     func applicationDidBecomeActive(_ application: UIApplication) {
         NSLog("applicationDidBecomeActive:")
         self.processPendingDeliveredNotifications()
+    }
+    
+    func applicationWillResignActive(_ application: UIApplication) {
+        NSLog("applicationWillResignActive:")
+        FRAClientWrapper.shared.updatePendingNotificationsCount()
+    }
+    
+    func applicationDidEnterBackground(_ application: UIApplication) {
+        NSLog("applicationDidEnterBackground:")
     }
     
     func application(_ application: UIApplication, didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data) {

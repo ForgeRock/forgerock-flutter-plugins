@@ -1,5 +1,5 @@
 //
-//  Copyright (c) 2022 ForgeRock. All rights reserved.
+//  Copyright (c) 2022-2023 ForgeRock. All rights reserved.
 //
 //  This software may be modified and distributed under the terms
 //  of the MIT license. See the LICENSE file for details.
@@ -24,6 +24,7 @@ struct FRAStorageClient: StorageClient {
     var notificationStorage: KeychainService
     var backupStorage: KeychainService
     let keychainServiceIdentifier = "com.forgerock.authenticator.keychainservice.local"
+    let notificationsMaxSize = 20
     
     init() {
         self.accountStorage = KeychainService(service: keychainServiceIdentifier + KeychainStoreType.account.rawValue)
@@ -188,6 +189,10 @@ struct FRAStorageClient: StorageClient {
         return self.notificationStorage.delete(notification.identifier)
     }
     
+    @discardableResult func removeAllNotifications() -> Bool {
+        return self.notificationStorage.deleteAll()
+    }
+    
     func getNotification(notificationIdentifier: String) -> PushNotification? {
         if let notificationData = self.notificationStorage.getData(notificationIdentifier),
             let notification = NSKeyedUnarchiver.unarchiveObject(with: notificationData) as? PushNotification {
@@ -223,10 +228,23 @@ struct FRAStorageClient: StorageClient {
                }
            }
         }
-        return notifications.sorted { (lhs, rhs) -> Bool in
+        notifications = notifications.sorted { (lhs, rhs) -> Bool in
             return lhs.timeAdded.timeIntervalSince1970 > rhs.timeAdded.timeIntervalSince1970
         }
-    }    
+        return self.removeOldNotificationEntries(notifications: &notifications)
+    }
+    
+    private func removeOldNotificationEntries(notifications: inout [PushNotification])  -> [PushNotification] {
+        FRALog.v("Checking old PushNotification entries to remove...")
+        var removedEntries = 0
+        while (notifications.count > notificationsMaxSize) {
+            self.removeNotification(notification: notifications.last!)
+            notifications.removeLast()
+            removedEntries+=1
+        }
+        FRALog.v("\(removedEntries) PushNotification entries removed.")
+        return notifications
+    }
     
     @discardableResult func isEmpty() -> Bool {
         return self.notificationStorage.allItems()?.count == 0 && self.mechanismStorage.allItems()?.count == 0 && self.accountStorage.allItems()?.count == 0
