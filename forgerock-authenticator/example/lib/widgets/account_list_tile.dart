@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 ForgeRock. All rights reserved.
+ * Copyright (c) 2022-2023 ForgeRock. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
@@ -39,7 +39,8 @@ class AccountListTile extends StatelessWidget {
                 ),
               ],
             ),
-            Column(
+            Expanded(
+                child:Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Container(
@@ -54,10 +55,13 @@ class AccountListTile extends StatelessWidget {
                   child: Text(
                     subtitle,
                     style: TextStyle(fontSize: 17),
+                    overflow: TextOverflow.ellipsis,
+                    maxLines: 1,
+                    softWrap: false,
                   )
                 ),
               ],
-            ),
+            )),
             trailing,
           ]
         ),

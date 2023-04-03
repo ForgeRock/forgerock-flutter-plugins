@@ -63,6 +63,8 @@ class AuthenticatorProvider with ChangeNotifier {
         return Future<Mechanism>.error(DuplicateMechanismException());
       } if( e.code == ForgerockAuthenticator.CreateMechanismException) {
         return Future<Mechanism>.error(MechanismCreationException(e.message));
+      } else if( e.code == ForgerockAuthenticator.PolicyViolationException) {
+        return Future<Mechanism>.error(PolicyViolationException(e.details, e.message));
       } else {
         return Future<Mechanism>.error(e);
       }
@@ -114,8 +116,6 @@ class AuthenticatorProvider with ChangeNotifier {
         return Future<bool>.error(AccountLockException(e.message));
       } else if( e.code == ForgerockAuthenticator.HandleNotificationException) {
         return Future<bool>.error(HandleNotificationException(e.message));
-      } else if( e.code == ForgerockAuthenticator.PolicyViolationException) {
-        return Future<bool>.error(PolicyViolationException(e.message));
       } else {
         return Future<bool>.error(e);
       }

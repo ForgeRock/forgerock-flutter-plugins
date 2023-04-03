@@ -278,7 +278,11 @@ open class FRAClientWrapper {
                 }
             } onError: { (error) in
                 if let result {
-                    result(FlutterError(code: "HANDLE_NOTIFICATION_EXCEPTION", message: error.localizedDescription, details: nil))
+                    if case AccountError.accountLocked(let param) = error {
+                        result(FlutterError(code: "ACCOUNT_LOCK_EXCEPTION", message: "This account is locked. It violates the following policy: (\(param))", details: nil))
+                    } else {
+                        result(FlutterError(code: "HANDLE_NOTIFICATION_EXCEPTION", message: error.localizedDescription, details: nil))
+                    }
                 }
             }
         } else {
@@ -300,8 +304,12 @@ open class FRAClientWrapper {
                 }
             },
             onError: { (error) in
-                if (result != nil) {
-                    result!(FlutterError(code: "HANDLE_NOTIFICATION_EXCEPTION", message: error.localizedDescription, details: nil))
+                if let result {
+                    if case AccountError.accountLocked(let param) = error {
+                        result(FlutterError(code: "ACCOUNT_LOCK_EXCEPTION", message: "This account is locked. It violates the following policy: (\(param))", details: nil))
+                    } else {
+                        result(FlutterError(code: "HANDLE_NOTIFICATION_EXCEPTION", message: error.localizedDescription, details: nil))
+                    }
                 }
             })
         } else {
@@ -325,7 +333,11 @@ open class FRAClientWrapper {
             },
             onError: { (error) in
                 if let result {
-                    result(FlutterError(code: "HANDLE_NOTIFICATION_EXCEPTION", message: error.localizedDescription, details: nil))
+                    if case AccountError.accountLocked(let param) = error {
+                        result(FlutterError(code: "ACCOUNT_LOCK_EXCEPTION", message: "This account is locked. It violates the following policy: (\(param))", details: nil))
+                    } else {
+                        result(FlutterError(code: "HANDLE_NOTIFICATION_EXCEPTION", message: error.localizedDescription, details: nil))
+                    }
                 }
             })
         } else {
@@ -342,7 +354,11 @@ open class FRAClientWrapper {
             }
         } onError: { (error) in
             if let result {
-                result(FlutterError(code: "HANDLE_NOTIFICATION_EXCEPTION", message: error.localizedDescription, details: nil))
+                if case AccountError.accountLocked(let param) = error {
+                    result(FlutterError(code: "ACCOUNT_LOCK_EXCEPTION", message: "This account is locked. It violates the following policy: (\(param))", details: nil))
+                } else {
+                    result(FlutterError(code: "HANDLE_NOTIFICATION_EXCEPTION", message: error.localizedDescription, details: nil))
+                }
             }
         }
     }
