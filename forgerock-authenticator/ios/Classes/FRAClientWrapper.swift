@@ -277,9 +277,7 @@ open class FRAClientWrapper {
                     result(true)
                 }
             } onError: { (error) in
-                if let result {
-                    result(FlutterError(code: "HANDLE_NOTIFICATION_EXCEPTION", message: error.localizedDescription, details: nil))
-                }
+                self.handlePushError(result: result, error: error)
             }
         } else {
             denyPushNotification(pushNotification: pushNotification, result: result)
@@ -300,9 +298,7 @@ open class FRAClientWrapper {
                 }
             },
             onError: { (error) in
-                if (result != nil) {
-                    result!(FlutterError(code: "HANDLE_NOTIFICATION_EXCEPTION", message: error.localizedDescription, details: nil))
-                }
+                self.handlePushError(result: result, error: error)
             })
         } else {
             denyPushNotification(pushNotification: pushNotification, result: result)
@@ -324,9 +320,7 @@ open class FRAClientWrapper {
                 }
             },
             onError: { (error) in
-                if let result {
-                    result(FlutterError(code: "HANDLE_NOTIFICATION_EXCEPTION", message: error.localizedDescription, details: nil))
-                }
+                self.handlePushError(result: result, error: error)
             })
         } else {
             denyPushNotification(pushNotification: pushNotification, result: result)
@@ -341,7 +335,15 @@ open class FRAClientWrapper {
                 result(true)
             }
         } onError: { (error) in
-            if let result {
+            self.handlePushError(result: result, error: error)
+        }
+    }
+    
+    private func handlePushError(result: FlutterResult?, error: Error) {
+        if let result {
+            if case AccountError.accountLocked(let param) = error {
+                result(FlutterError(code: "ACCOUNT_LOCK_EXCEPTION", message: "This account is locked. It violates the following policy: (\(param))", details: nil))
+            } else {
                 result(FlutterError(code: "HANDLE_NOTIFICATION_EXCEPTION", message: error.localizedDescription, details: nil))
             }
         }
