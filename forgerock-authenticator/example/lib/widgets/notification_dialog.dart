@@ -142,11 +142,7 @@ class NotificationDialog extends StatelessWidget {
       await AuthenticatorProvider.performPushAuthenticationWithBiometric(
           pushNotification, 'Biometric is required to process this notification', true, approve
       ).catchError((Object error) {
-        if (error is AccountLockException) {
-          message = error.toString();
-        } else {
-          message = error.toString();
-        }
+        message = error.toString();
       }).then((Object value) {
         _showResult(rootContext, message);
         Navigator.of(rootContext).pop();
