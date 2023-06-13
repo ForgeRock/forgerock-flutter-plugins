@@ -6,7 +6,7 @@
 
 #### Updated
 
-- Android and iOS `forgerock-authenticator` dependency to the 4.0.0-beta4 release.
+- Android and iOS `forgerock-authenticator` dependency to the 4.0.0 release
 - Sample app updated to use the new Authenticator policies feature
 
 ## [1.1.2]
