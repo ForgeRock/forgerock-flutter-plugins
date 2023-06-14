@@ -63,8 +63,7 @@ class AccountLockException implements Exception {
 
   AccountLockException([String? message]) {
     if (message != null) {
-      this._message =
-      'Account is locked:\n $message';
+      this._message = 'Account is locked:\n $message';
     } else {
       this._message = 'This action cannot be performed. Account is locked.';
     }
@@ -79,9 +78,13 @@ class AccountLockException implements Exception {
 /// Exception thrown when an Account cannot be registered due policy violation.
 class PolicyViolationException implements Exception {
   late String _message;
+  late String _policyName;
 
-  PolicyViolationException([String message = 'The account cannot be registered on this device. It violates some policy']) {
-      this._message = message;
+  PolicyViolationException(String policy,
+      [String message =
+          'The account cannot be registered on this device. It violates some policy']) {
+    this._message = message;
+    this._policyName = policy;
   }
 
   @override
@@ -89,13 +92,8 @@ class PolicyViolationException implements Exception {
     return _message;
   }
 
-  // TODO: Change this method to return data from a new _policyName field
+  /// Return the name of the policy which caused the exception
   String? getPolicyName() {
-    int index = _message.indexOf(':');
-    if (index != 0) {
-      return _message.substring(index+1, _message.length).trim();
-    } else {
-      return null;
-    }
+    return _policyName;
   }
 }

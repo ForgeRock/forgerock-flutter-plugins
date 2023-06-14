@@ -23,7 +23,7 @@ class AuthenticatorProvider with ChangeNotifier {
 
   void updateAccountIndex() {
     _accountIndex = <String, Account>{};
-    for(final Account a in _accountList) {
+    for (final Account a in _accountList) {
       _accountIndex[a.id] = a;
     }
   }
@@ -35,7 +35,7 @@ class AuthenticatorProvider with ChangeNotifier {
   static Future<void> initialize() async {
     try {
       await ForgerockAuthenticator.start();
-    } on PlatformException catch(e) {
+    } on PlatformException catch (e) {
       print(e);
     }
   }
@@ -53,16 +53,21 @@ class AuthenticatorProvider with ChangeNotifier {
 
   Future<Mechanism> addAccount(String uri) async {
     try {
-      final Mechanism mechanism = await ForgerockAuthenticator.createMechanismFromUri(uri);
+      final Mechanism mechanism =
+          await ForgerockAuthenticator.createMechanismFromUri(uri);
       if (mechanism != null) {
         getAllAccounts();
       }
       return mechanism;
-    } on PlatformException catch(e) {
-      if( e.code == ForgerockAuthenticator.DuplicateMechanismException) {
+    } on PlatformException catch (e) {
+      if (e.code == ForgerockAuthenticator.DuplicateMechanismException) {
         return Future<Mechanism>.error(DuplicateMechanismException());
-      } if( e.code == ForgerockAuthenticator.CreateMechanismException) {
+      }
+      if (e.code == ForgerockAuthenticator.CreateMechanismException) {
         return Future<Mechanism>.error(MechanismCreationException(e.message));
+      } else if (e.code == ForgerockAuthenticator.PolicyViolationException) {
+        return Future<Mechanism>.error(
+            PolicyViolationException(e.details, e.message));
       } else {
         return Future<Mechanism>.error(e);
       }
@@ -71,7 +76,7 @@ class AuthenticatorProvider with ChangeNotifier {
 
   Future<bool> removeAccount(String accountId) async {
     final bool success = await ForgerockAuthenticator.removeAccount(accountId);
-    if(success) {
+    if (success) {
       getAllAccounts();
     }
     return success;
@@ -80,8 +85,8 @@ class AuthenticatorProvider with ChangeNotifier {
   Future<OathTokenCode> getOathTokenCode(String mechanismId) async {
     try {
       return ForgerockAuthenticator.getOathTokenCode(mechanismId);
-    } on PlatformException catch(e) {
-      if( e.code == ForgerockAuthenticator.AccountLockException) {
+    } on PlatformException catch (e) {
+      if (e.code == ForgerockAuthenticator.AccountLockException) {
         return Future<OathTokenCode>.error(AccountLockException(e.message));
       } else {
         return Future<OathTokenCode>.error(e);
@@ -89,14 +94,15 @@ class AuthenticatorProvider with ChangeNotifier {
     }
   }
 
-  static Future<bool> performPushAuthentication(PushNotification pushNotification,
-      bool accept) async {
+  static Future<bool> performPushAuthentication(
+      PushNotification pushNotification, bool accept) async {
     try {
-      return ForgerockAuthenticator.performPushAuthentication(pushNotification, accept);
-    } on PlatformException catch(e) {
-      if( e.code == ForgerockAuthenticator.AccountLockException) {
+      return ForgerockAuthenticator.performPushAuthentication(
+          pushNotification, accept);
+    } on PlatformException catch (e) {
+      if (e.code == ForgerockAuthenticator.AccountLockException) {
         return Future<bool>.error(AccountLockException(e.message));
-      } else if( e.code == ForgerockAuthenticator.HandleNotificationException) {
+      } else if (e.code == ForgerockAuthenticator.HandleNotificationException) {
         return Future<bool>.error(HandleNotificationException(e.message));
       } else {
         return Future<bool>.error(e);
@@ -105,17 +111,17 @@ class AuthenticatorProvider with ChangeNotifier {
   }
 
   static Future<bool> performPushAuthenticationWithChallenge(
-      PushNotification pushNotification, String challengeResponse, bool accept) async {
+      PushNotification pushNotification,
+      String challengeResponse,
+      bool accept) async {
     try {
-      return ForgerockAuthenticator.performPushAuthenticationWithChallenge(pushNotification,
-          challengeResponse, accept);
-    } on PlatformException catch(e) {
-      if( e.code == ForgerockAuthenticator.AccountLockException) {
+      return ForgerockAuthenticator.performPushAuthenticationWithChallenge(
+          pushNotification, challengeResponse, accept);
+    } on PlatformException catch (e) {
+      if (e.code == ForgerockAuthenticator.AccountLockException) {
         return Future<bool>.error(AccountLockException(e.message));
-      } else if( e.code == ForgerockAuthenticator.HandleNotificationException) {
+      } else if (e.code == ForgerockAuthenticator.HandleNotificationException) {
         return Future<bool>.error(HandleNotificationException(e.message));
-      } else if( e.code == ForgerockAuthenticator.PolicyViolationException) {
-        return Future<bool>.error(PolicyViolationException(e.message));
       } else {
         return Future<bool>.error(e);
       }
@@ -123,20 +129,21 @@ class AuthenticatorProvider with ChangeNotifier {
   }
 
   static Future<bool> performPushAuthenticationWithBiometric(
-      PushNotification pushNotification, String title,
-      bool allowDeviceCredentials, bool accept) async {
+      PushNotification pushNotification,
+      String title,
+      bool allowDeviceCredentials,
+      bool accept) async {
     try {
-      return ForgerockAuthenticator.performPushAuthenticationWithBiometric(pushNotification,
-          title, allowDeviceCredentials, accept);
-    } on PlatformException catch(e) {
-      if( e.code == ForgerockAuthenticator.AccountLockException) {
+      return ForgerockAuthenticator.performPushAuthenticationWithBiometric(
+          pushNotification, title, allowDeviceCredentials, accept);
+    } on PlatformException catch (e) {
+      if (e.code == ForgerockAuthenticator.AccountLockException) {
         return Future<bool>.error(AccountLockException(e.message));
-      } else if( e.code == ForgerockAuthenticator.HandleNotificationException) {
+      } else if (e.code == ForgerockAuthenticator.HandleNotificationException) {
         return Future<bool>.error(HandleNotificationException(e.message));
       } else {
         return Future<bool>.error(e);
       }
     }
   }
-
 }

@@ -1,11 +1,12 @@
 /*
- * Copyright (c) 2022 ForgeRock. All rights reserved.
+ * Copyright (c) 2022-2023 ForgeRock. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
  */
 
 import 'package:flutter/material.dart';
+import 'package:forgerock_authenticator/exception/exceptions.dart';
 
 import 'package:forgerock_authenticator/models/push_notification.dart';
 import 'package:forgerock_authenticator/models/push_type.dart';
@@ -62,7 +63,12 @@ class NotificationDialog extends StatelessWidget {
               color: Color(0xff006ac8),
               text: 'Accept',
             ),
-            const SizedBox(width: 25),
+          ],
+        ),
+        const SizedBox(height: 15),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
             DefaultButton(
               key: const Key('reject-button'),
               action: () async {

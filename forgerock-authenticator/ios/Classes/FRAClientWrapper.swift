@@ -1,5 +1,5 @@
 //
-//  Copyright (c) 2022 ForgeRock. All rights reserved.
+//  Copyright (c) 2022-2023 ForgeRock. All rights reserved.
 //
 //  This software may be modified and distributed under the terms
 //  of the MIT license. See the LICENSE file for details.
@@ -48,6 +48,9 @@ open class FRAClientWrapper {
             case MechanismError.alreadyExists(let message):
                 result(FlutterError(code: "DUPLICATE_MECHANISM_EXCEPTION", message: error.localizedDescription, details: message))
                 break
+            case AccountError.failToRegisterPolicyViolation(let policy):
+                result(FlutterError(code: "POLICY_VIOLATION_EXCEPTION", message: error.localizedDescription, details: policy))
+                break
             default:
                 result(FlutterError(code: "CREATE_MECHANISM_EXCEPTION", message: error.localizedDescription, details: nil))
                 break
@@ -62,7 +65,7 @@ open class FRAClientWrapper {
         let accounts = FRAClient.shared?.getAllAccounts() ?? []
         var tmpAccounts: [Any] = []
         for account in accounts {
-            if let convertedAccount = account.toJson() {
+            if let convertedAccount = AccountConverter.toJson(account: account) {
                 tmpAccounts.append(convertedAccount)
             }
         }
@@ -274,9 +277,7 @@ open class FRAClientWrapper {
                     result(true)
                 }
             } onError: { (error) in
-                if let result {
-                    result(FlutterError(code: "HANDLE_NOTIFICATION_EXCEPTION", message: error.localizedDescription, details: nil))
-                }
+                self.handlePushError(result: result, error: error)
             }
         } else {
             denyPushNotification(pushNotification: pushNotification, result: result)
@@ -297,9 +298,7 @@ open class FRAClientWrapper {
                 }
             },
             onError: { (error) in
-                if (result != nil) {
-                    result!(FlutterError(code: "HANDLE_NOTIFICATION_EXCEPTION", message: error.localizedDescription, details: nil))
-                }
+                self.handlePushError(result: result, error: error)
             })
         } else {
             denyPushNotification(pushNotification: pushNotification, result: result)
@@ -321,9 +320,7 @@ open class FRAClientWrapper {
                 }
             },
             onError: { (error) in
-                if let result {
-                    result(FlutterError(code: "HANDLE_NOTIFICATION_EXCEPTION", message: error.localizedDescription, details: nil))
-                }
+                self.handlePushError(result: result, error: error)
             })
         } else {
             denyPushNotification(pushNotification: pushNotification, result: result)
@@ -338,7 +335,15 @@ open class FRAClientWrapper {
                 result(true)
             }
         } onError: { (error) in
-            if let result {
+            self.handlePushError(result: result, error: error)
+        }
+    }
+    
+    private func handlePushError(result: FlutterResult?, error: Error) {
+        if let result {
+            if case AccountError.accountLocked(let param) = error {
+                result(FlutterError(code: "ACCOUNT_LOCK_EXCEPTION", message: "This account is locked. It violates the following policy: (\(param))", details: nil))
+            } else {
                 result(FlutterError(code: "HANDLE_NOTIFICATION_EXCEPTION", message: error.localizedDescription, details: nil))
             }
         }
@@ -389,8 +394,9 @@ open class FRAClientWrapper {
     //MARK: - Datastore upgrade
 
     func getStoredAccount(accountIdentifier: String, result: @escaping FlutterResult) {
+        
         if let account = storageClient.getAccount(accountIdentifier: accountIdentifier) {
-            let convertedAccount = account.toJson()
+            let convertedAccount = AccountConverter.toJson(account: account)
             result(convertedAccount)
         } else {
             result(nil);

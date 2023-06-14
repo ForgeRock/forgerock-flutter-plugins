@@ -55,10 +55,9 @@ class Account {
         json['imageURL'] == 'null' ? null : json['imageURL'],
         json['backgroundColor'] == 'null' ? null : json['backgroundColor'],
         json['timeAdded'],
-        json['policies'],
-        json['lockingPolicy'],
-        json['lock'] == null ? false : json['lock']
-    );
+        json['policies'] == 'null' ? null : json['policies'],
+        json['lockingPolicy'] == 'null' ? null : json['lockingPolicy'],
+        json['lock'] == null ? false : json['lock']);
 
     if (json['mechanismList'] != null) {
       List? toParseList;
