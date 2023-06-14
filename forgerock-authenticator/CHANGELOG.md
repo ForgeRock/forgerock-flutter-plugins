@@ -1,6 +1,6 @@
 # Version 1.2.0
 
-##[1.2.0]
+## [1.2.0]
 #### Added
 - New Authenticator Policies feature [SDKS-2326]
 
