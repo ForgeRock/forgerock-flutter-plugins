@@ -57,8 +57,7 @@ class Account {
         json['timeAdded'],
         json['policies'] == 'null' ? null : json['policies'],
         json['lockingPolicy'] == 'null' ? null : json['lockingPolicy'],
-        json['lock'] == null ? false : json['lock']
-    );
+        json['lock'] == null ? false : json['lock']);
 
     if (json['mechanismList'] != null) {
       List? toParseList;

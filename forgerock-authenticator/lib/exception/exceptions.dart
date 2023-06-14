@@ -63,8 +63,7 @@ class AccountLockException implements Exception {
 
   AccountLockException([String? message]) {
     if (message != null) {
-      this._message =
-      'Account is locked:\n $message';
+      this._message = 'Account is locked:\n $message';
     } else {
       this._message = 'This action cannot be performed. Account is locked.';
     }
@@ -81,9 +80,11 @@ class PolicyViolationException implements Exception {
   late String _message;
   late String _policyName;
 
-  PolicyViolationException(String policy, [String message = 'The account cannot be registered on this device. It violates some policy']) {
-      this._message = message;
-      this._policyName = policy;
+  PolicyViolationException(String policy,
+      [String message =
+          'The account cannot be registered on this device. It violates some policy']) {
+    this._message = message;
+    this._policyName = policy;
   }
 
   @override
