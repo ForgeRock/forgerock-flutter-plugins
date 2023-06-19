@@ -17,13 +17,16 @@ struct FRAStorageClient: StorageClient {
         case mechanism = ".mechanism"
         case notification = ".notification"
         case backup = ".backup"
+        case backup = ".token"
     }
     
     var accountStorage: KeychainService
     var mechanismStorage: KeychainService
     var notificationStorage: KeychainService
     var backupStorage: KeychainService
+    var tokenStorage: KeychainService
     let keychainServiceIdentifier = "com.forgerock.authenticator.keychainservice.local"
+    let tokenKey = "token"
     let notificationsMaxSize = 20
     
     init() {
@@ -31,6 +34,7 @@ struct FRAStorageClient: StorageClient {
         self.mechanismStorage = KeychainService(service: keychainServiceIdentifier + KeychainStoreType.mechanism.rawValue)
         self.notificationStorage = KeychainService(service: keychainServiceIdentifier + KeychainStoreType.notification.rawValue)
         self.backupStorage = KeychainService(service: keychainServiceIdentifier + KeychainStoreType.backup.rawValue)
+        self.tokenStorage = KeychainService(service: keychainServiceIdentifier + KeychainStoreType.token.rawValue)
     }
     
     @discardableResult func setAccount(account: Account) -> Bool {
@@ -288,6 +292,32 @@ struct FRAStorageClient: StorageClient {
         } else {
             let backupData = NSKeyedArchiver.archivedData(withRootObject: jsonData)
             return self.backupStorage.set(backupData, key: identifier)
+        }
+    }
+
+    @discardableResult func setToken(token: String) -> Bool {
+        if #available(iOS 11.0, *) {
+            do {
+                let tokenData = try NSKeyedArchiver.archivedData(withRootObject: token, requiringSecureCoding: true)
+                return self.tokenStorage.set(tokenData, key: tokenKey)
+            }
+            catch {
+                FRALog.e("Failed to serialize Token object: \(error.localizedDescription)")
+                return false
+            }
+        } else {
+            let tokenData = NSKeyedArchiver.archivedData(withRootObject: token)
+            return self.tokenStorage.set(tokenData, key: tokenKey)
+        }
+    }
+    
+    func getToken() -> String? {
+        if let tokenData = self.tokenStorage.getData(tokenKey),
+           let data = NSKeyedUnarchiver.unarchiveObject(with: tokenData) as? String {
+            return data
+        }
+        else {
+            return nil
         }
     }
     
