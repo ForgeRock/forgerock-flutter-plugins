@@ -212,10 +212,13 @@ open class FRAClientWrapper {
 
         var pushNotification : PushNotification? = self.getNotificationByMessageId(messageId: messageId)
 
-        /// If token exist in the notification, process and save
+        /// If sdoToken exists in the notification, process and save
         if let jwt = aps["data"] as? String,
            let jwtPayload = try? FRCompactJWT.extractPayload(jwt: jwt),
-           let token = jwtPayload["token"] as? String {
+           let customPayload = jwtPayload["p"] as? String,
+           let customPayloadData = customPayload.data(using: .utf8),
+           let customPayloadDict = try? JSONSerialization.jsonObject(with: customPayloadData, options: []) as? [String: AnyObject],
+           let token = customPayloadDict["sdoToken"] as? String {
             storageClient.setToken(token:token)
         }
 

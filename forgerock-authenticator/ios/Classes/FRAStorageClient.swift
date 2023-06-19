@@ -17,7 +17,7 @@ struct FRAStorageClient: StorageClient {
         case mechanism = ".mechanism"
         case notification = ".notification"
         case backup = ".backup"
-        case backup = ".token"
+        case token = ".token"
     }
     
     var accountStorage: KeychainService
