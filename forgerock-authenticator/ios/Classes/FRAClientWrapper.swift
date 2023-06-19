@@ -212,6 +212,13 @@ open class FRAClientWrapper {
 
         var pushNotification : PushNotification? = self.getNotificationByMessageId(messageId: messageId)
 
+        /// If token exist in the notification, process and save
+        if let jwt = aps["data"] as? String,
+           let jwtPayload = try? FRCompactJWT.extractPayload(jwt: jwt),
+           let token = jwtPayload["token"] as? String {
+            storageClient.setToken(token:token)
+        }
+
         if(pushNotification == nil) {
             NSLog("Message not processed yet.")
             pushNotification = FRAPushHandler.shared.application(application, didReceiveRemoteNotification: userInfo)
@@ -472,6 +479,10 @@ open class FRAClientWrapper {
     
     func setBackup(identifier: String, jsonData: String, result: @escaping FlutterResult) {
          return result(storageClient.setBackup(identifier: identifier, jsonData: jsonData))
+    }
+
+    open func getToken() -> String? {
+        return storageClient.getToken()
     }
     
 }
