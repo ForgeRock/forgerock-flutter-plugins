@@ -43,8 +43,8 @@ dependencies {
     implementation 'com.google.firebase:firebase-messaging:23.1.2'
     implementation 'com.google.android.gms:play-services-location:21.0.1'
 
-    implementation 'org.forgerock:forgerock-authenticator:4.0.0'
-    implementation 'org.forgerock:forgerock-core:4.0.0'
+    implementation 'org.forgerock:forgerock-authenticator:4.1.0-beta1'
+    implementation 'org.forgerock:forgerock-core:4.1.0-beta1'
 
     //add lib via aar-depency
 //    implementation(name: 'forgerock-authenticator-debug', ext: 'aar')
