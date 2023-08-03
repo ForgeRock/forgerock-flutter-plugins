@@ -38,6 +38,10 @@ class ForgerockAuthenticator {
   static const PushRegistrationException = 'PUSH_REGISTRATION_EXCEPTION';
   static const PolicyViolationException = 'POLICY_VIOLATION_EXCEPTION';
 
+  static const PUSH_URI = 'pushauth';
+  static const OATH_URI = 'otpauth';
+  static const MFAUTH_URI = 'mfauth';
+
   //
   // Authenticator SDK methods
   //

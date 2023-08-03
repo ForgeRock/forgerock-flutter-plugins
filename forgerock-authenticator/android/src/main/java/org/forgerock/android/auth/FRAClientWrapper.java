@@ -179,7 +179,7 @@ public class FRAClientWrapper {
                     public void run() {
                         if (e instanceof DuplicateMechanismException)  {
                             flutterResult.error("DUPLICATE_MECHANISM_EXCEPTION", e.getLocalizedMessage(),
-                                    ((DuplicateMechanismException) e).getCausingMechanism().toJson());
+                                    ((DuplicateMechanismException) e).getCausingMechanism().getId());
                         } else if (e instanceof MechanismPolicyViolationException) {
                             flutterResult.error("POLICY_VIOLATION_EXCEPTION", e.getLocalizedMessage(),
                                     ((MechanismPolicyViolationException) e).getCausingPolicy().getName());
