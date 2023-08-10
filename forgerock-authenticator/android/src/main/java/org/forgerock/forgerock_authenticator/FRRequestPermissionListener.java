@@ -16,14 +16,10 @@ import androidx.annotation.RequiresApi;
 import androidx.core.app.ActivityCompat;
 import androidx.fragment.app.FragmentActivity;
 
-import org.forgerock.android.auth.FRANotificationPermissionHelper;
-
 import io.flutter.plugin.common.PluginRegistry;
 
 @RequiresApi(api = Build.VERSION_CODES.TIRAMISU)
 public class FRRequestPermissionListener implements PluginRegistry.RequestPermissionsResultListener {
-
-    static final String TAG = FRRequestPermissionListener.class.getName();
 
     private static final int REQUEST_PERMISSION = 101;
 
