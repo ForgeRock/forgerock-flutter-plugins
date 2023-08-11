@@ -8,15 +8,22 @@
 /// Exception thrown when a Mechanism was already registered
 class DuplicateMechanismException implements Exception {
   late String _message;
+  late String _mechanismId;
 
-  DuplicateMechanismException(
+  DuplicateMechanismException(String mechanismId,
       [String message = 'This authentication method is already registered.']) {
     this._message = message;
+    this._mechanismId = mechanismId;
   }
 
   @override
   String toString() {
     return _message;
+  }
+
+  /// Return the Id of the mechanism which caused the exception
+  String? getMechanismId() {
+    return _mechanismId;
   }
 }
 

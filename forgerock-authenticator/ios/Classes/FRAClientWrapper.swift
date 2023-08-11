@@ -45,8 +45,8 @@ open class FRAClientWrapper {
             result(MechanismConverter.toJson(mechanism: mechanism))
         }, onError: { (error) in
             switch error {
-            case MechanismError.alreadyExists(let message):
-                result(FlutterError(code: "DUPLICATE_MECHANISM_EXCEPTION", message: error.localizedDescription, details: message))
+            case MechanismError.alreadyExists(let mechanismId):
+                result(FlutterError(code: "DUPLICATE_MECHANISM_EXCEPTION", message: error.localizedDescription, details: mechanismId))
                 break
             case AccountError.failToRegisterPolicyViolation(let policy):
                 result(FlutterError(code: "POLICY_VIOLATION_EXCEPTION", message: error.localizedDescription, details: policy))
