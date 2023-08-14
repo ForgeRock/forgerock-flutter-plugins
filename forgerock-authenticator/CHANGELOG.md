@@ -3,11 +3,14 @@
 ## [1.2.0]
 #### Added
 - New Authenticator Policies feature [SDKS-2326]
+- Option to update an existing account when scanning a QR  [SDKS-2569]
 
 #### Updated
 
-- Android and iOS `forgerock-authenticator` dependency to the 4.1.0 release
+- Android `forgerock-authenticator` dependency to the 4.1.0 release
+- iOS `forgerock-authenticator` dependency to the 4.1.1 release
 - Sample app updated to use the new Authenticator policies feature
+- Fixed app crash on Android 13 devices [SDKS-2640]
 
 ## [1.1.2]
 
