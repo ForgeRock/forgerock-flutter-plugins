@@ -16,7 +16,7 @@ Pod::Spec.new do |s|
   s.source_files = 'Classes/**/*'
   s.platform = :ios, '12.0'
   s.dependency 'Flutter'
-  s.dependency 'FRAuthenticator', '4.1.0'
+  s.dependency 'FRAuthenticator', '4.1.1-beta1'
 
   # Flutter.framework does not contain a i386 slice.
   s.pod_target_xcconfig = { 'DEFINES_MODULE' => 'YES', 'EXCLUDED_ARCHS[sdk=iphonesimulator*]' => 'i386' }
