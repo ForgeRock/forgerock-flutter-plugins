@@ -61,7 +61,7 @@ class AuthenticatorProvider with ChangeNotifier {
       return mechanism;
     } on PlatformException catch (e) {
       if (e.code == ForgerockAuthenticator.DuplicateMechanismException) {
-        return Future<Mechanism>.error(DuplicateMechanismException());
+        return Future<Mechanism>.error(DuplicateMechanismException(e.details, e.message));
       }
       if (e.code == ForgerockAuthenticator.CreateMechanismException) {
         return Future<Mechanism>.error(MechanismCreationException(e.message));

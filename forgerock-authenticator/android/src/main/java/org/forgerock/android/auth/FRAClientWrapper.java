@@ -14,7 +14,6 @@ import android.os.Looper;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.RequiresApi;
 import androidx.fragment.app.FragmentActivity;
 
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -29,6 +28,7 @@ import org.forgerock.android.auth.exception.InvalidPolicyException;
 import org.forgerock.android.auth.exception.MechanismPolicyViolationException;
 import org.forgerock.android.auth.exception.OathMechanismException;
 import org.forgerock.android.auth.policy.FRAPolicy;
+import org.forgerock.forgerock_authenticator.FRRequestPermissionListener;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -104,7 +104,7 @@ public class FRAClientWrapper {
         }
     }
 
-    public void start(final Result flutterResult, final FragmentActivity activity) {
+    public void start(final Result flutterResult, final FRRequestPermissionListener permissionListener) {
         try {
             // Initialise SDK passing application Context and custom StorageClient
             fraClient = FRAClient.builder()
@@ -141,9 +141,17 @@ public class FRAClientWrapper {
 
                                 // Request notification permission for Android 13 and above
                                 if (Build.VERSION.SDK_INT >= 33) {
-                                    FRANotificationPermissionHelper permissionHelper = FRANotificationPermissionHelper
-                                            .init(activity);
-                                    permissionHelper.requestNotificationPermission();
+                                    permissionListener.requestPermissions(new FRRequestPermissionListener.RequestPermission() {
+                                        @Override
+                                        public void onRequestPermissionSuccess() {
+                                            Log.d(TAG, "Notification permission granted.");
+                                        }
+
+                                        @Override
+                                        public void onRequestPermissionFailure() {
+                                            Log.d(TAG, "Notification permission denied.");
+                                        }
+                                    });
                                 }
 
                                 flutterResult.success(true);
@@ -179,7 +187,7 @@ public class FRAClientWrapper {
                     public void run() {
                         if (e instanceof DuplicateMechanismException)  {
                             flutterResult.error("DUPLICATE_MECHANISM_EXCEPTION", e.getLocalizedMessage(),
-                                    ((DuplicateMechanismException) e).getCausingMechanism().toJson());
+                                    ((DuplicateMechanismException) e).getCausingMechanism().getId());
                         } else if (e instanceof MechanismPolicyViolationException) {
                             flutterResult.error("POLICY_VIOLATION_EXCEPTION", e.getLocalizedMessage(),
                                     ((MechanismPolicyViolationException) e).getCausingPolicy().getName());

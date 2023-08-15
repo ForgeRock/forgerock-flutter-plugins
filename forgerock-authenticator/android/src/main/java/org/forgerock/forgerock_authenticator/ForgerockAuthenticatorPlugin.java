@@ -10,6 +10,7 @@ package org.forgerock.forgerock_authenticator;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.os.Build;
 import android.util.Log;
 import android.view.WindowManager;
 
@@ -40,6 +41,8 @@ public class ForgerockAuthenticatorPlugin implements FlutterPlugin, MethodCallHa
   private MethodChannel channel;
   private FRAClientWrapper fraClientWrapper;
   private FragmentActivity activity;
+  private ActivityPluginBinding activityBinding;
+  private FRRequestPermissionListener permissionListener;
   private Context context;
   private BroadcastReceiver changeReceiver;
   private String initialLink;
@@ -78,7 +81,7 @@ public class ForgerockAuthenticatorPlugin implements FlutterPlugin, MethodCallHa
         result.success(this.latestLink);
         break;
       case "start":
-        this.fraClientWrapper.start(result, activity);
+        this.fraClientWrapper.start(result, permissionListener);
         break;
       case "createMechanismFromUri":
         String uri = call.argument("uri");
@@ -261,9 +264,16 @@ public class ForgerockAuthenticatorPlugin implements FlutterPlugin, MethodCallHa
 
   @Override
   public void onAttachedToActivity(@NonNull ActivityPluginBinding activityPluginBinding) {
+    this.activityBinding = activityPluginBinding;
     this.activity = (FragmentActivity) activityPluginBinding.getActivity();
 
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+      this.permissionListener = new FRRequestPermissionListener(this.activity);
+      activityPluginBinding.addRequestPermissionsResultListener(this.permissionListener);
+    }
+
     activityPluginBinding.addOnNewIntentListener(this);
+
     this.handleIntent(this.context, activityPluginBinding.getActivity().getIntent());
   }
 
@@ -279,7 +289,7 @@ public class ForgerockAuthenticatorPlugin implements FlutterPlugin, MethodCallHa
 
   @Override
   public void onDetachedFromActivity() {
-    this.activity = null;
+    tearDown();
   }
 
   @Override
@@ -330,4 +340,10 @@ public class ForgerockAuthenticatorPlugin implements FlutterPlugin, MethodCallHa
     }
   }
 
+  private void tearDown() {
+    this.activity = null;
+    this.activityBinding.removeRequestPermissionsResultListener(permissionListener);
+    this.activityBinding = null;
+    this.permissionListener = null;
+  }
 }
