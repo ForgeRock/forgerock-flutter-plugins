@@ -4,7 +4,7 @@
 
 <p align="center">
   <a href="https://github.com/ForgeRock">
-    <img src="https://www.forgerock.com/themes/custom/forgerock/images/fr-logo-horz-color.svg" alt="Logo">
+    <img src="https://www.pingidentity.com/content/dam/picr/nav/Ping-Logo-2.svg" alt="Logo">
   </a>
   <center>
     <h2>ForgeRock Authenticator Plugin</h2>
@@ -35,7 +35,7 @@ This project is provided as a Flutter plugin, a specialized package that include
   * Access Management (AM) 6.5.2
 * Android API level 23+
 * iOS 12 and above
-* Flutter SDK 2.10.x and above
+* Flutter SDK 3.9.x and above
 
 ## Installation
 

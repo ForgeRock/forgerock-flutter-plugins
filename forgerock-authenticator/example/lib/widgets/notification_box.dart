@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 ForgeRock. All rights reserved.
+ * Copyright (c) 2022-2025 ForgeRock. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
@@ -9,10 +9,9 @@ import 'package:flutter/material.dart';
 
 /// This widget is used to decorate a notification dialog.
 class NotificationBox extends StatelessWidget {
+  const NotificationBox({super.key, required this.child});
 
   final Widget child;
-
-  const NotificationBox({Key key, this.child}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -32,8 +31,9 @@ class NotificationBox extends StatelessWidget {
               borderRadius: BorderRadius.circular(20),
               boxShadow: const [
                 BoxShadow(
-                  color: Colors.black,offset: Offset(0,5),
-                  blurRadius: 5
+                  color: Colors.black,
+                  offset: Offset(0, 5),
+                  blurRadius: 5,
                 ),
               ]
             ),

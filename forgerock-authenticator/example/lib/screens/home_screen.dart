@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 ForgeRock. All rights reserved.
+ * Copyright (c) 2022-2025 ForgeRock. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
@@ -25,84 +25,92 @@ import '../widgets/notification_dialog.dart';
 /// This is the main screen of the app. It shows a list of accounts registered
 /// with the SDK.
 class HomeScreen extends StatefulWidget {
+  const HomeScreen({super.key});
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-
   final ForgerockPushConnector pushConnector = ForgerockPushConnector();
 
   @override
   void initState() {
-    _setupPushConnector();
     super.initState();
+    _setupPushConnector();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          _scan(context);
-        },
-        child: Icon(
+        onPressed: () => _scan(context),
+        backgroundColor: Colors.orange,
+        child: const Icon(
           Icons.qr_code_scanner,
           size: 30,
           color: Colors.white,
         ),
-        backgroundColor: Colors.orange,
       ),
-      appBar: AuthenticatorAppBar(
-          actions: [
-            ActionsMenu()
-          ]
-      ),
-      body: AccountList(),
+      appBar: const AuthenticatorAppBar(actions: [ActionsMenu()]),
+      body: const AccountList(),
     );
   }
 
-  Future<void> _setupPushConnector() async {
+  void _setupPushConnector() {
     pushConnector.token.addListener(() {
-      print('Token ${pushConnector.token.value}');
+      final token = pushConnector.token.value;
+      if (token != null && token.isNotEmpty) {
+        debugPrint('Token $token');
+      }
     });
 
     pushConnector.pendingNotification.addListener(() {
-      _processPendingNotification(pushConnector.pendingNotification.value);
+      _processPendingNotification(
+        pushConnector.pendingNotification.value as String?,
+      );
     });
   }
 
-  Future<void> _processPendingNotification(dynamic pendingNotification) async {
-    if(pendingNotification != null) {
-      final PushNotification notification = PushNotification.fromJson(jsonDecode(pendingNotification));
-      if(notification.pending && !notification.isExpired()) {
-        print('Processing pending notification with id ${notification.messageId}');
-        showDialog<Widget>(context: context, builder: (BuildContext context) {
-          return NotificationDialog(
-            pushNotification: notification,
-          );
-        });
+  Future<void> _processPendingNotification(String? pendingNotification) async {
+    if (pendingNotification == null || pendingNotification.isEmpty) {
+      return;
+    }
+    final PushNotification notification =
+        PushNotification.fromJson(jsonDecode(pendingNotification));
+    if (notification.pending == true && !notification.isExpired()) {
+      debugPrint('Processing pending notification with id ${notification.messageId}');
+      if (!mounted) {
+        return;
       }
+      await showDialog<Widget>(
+        context: context,
+        builder: (BuildContext dialogContext) => NotificationDialog(
+          pushNotification: notification,
+        ),
+      );
     }
   }
 
   Future<void> _scan(BuildContext context) async {
-    final BuildContext rootContext =
-        context.findRootAncestorStateOfType<NavigatorState>().context;
+    final NavigatorState navigator = Navigator.of(context, rootNavigator: true);
+    final BuildContext rootContext = navigator.context;
     try {
-      ScanResult result = await BarcodeScanner.scan();
-      String qrResult = result.rawContent;
-      if(qrResult != '') {
-        Provider.of<AuthenticatorProvider>(context, listen: false)
-            .addAccount(qrResult)
-            .catchError((Object error) {
-              alert(rootContext, 'Error adding account via QRCode', error.toString());
-        });
+      final ScanResult result = await BarcodeScanner.scan();
+      final String qrResult = result.rawContent;
+      if (qrResult.isNotEmpty) {
+        final authenticatorProvider =
+            Provider.of<AuthenticatorProvider>(context, listen: false);
+        try {
+          await authenticatorProvider.addAccount(qrResult);
+        } catch (error) {
+          alert(rootContext, 'Error adding account via QRCode',
+              error.toString());
+        }
       }
     } on PlatformException catch (e) {
       if (e.code == BarcodeScanner.cameraAccessDenied) {
-        alert(context, 'Error', 'Camera Access was not granted');
+        alert(context, 'Error', 'Camera access was not granted');
       } else {
         alert(context, 'Error', e.toString());
       }
@@ -110,5 +118,4 @@ class _HomeScreenState extends State<HomeScreen> {
       alert(context, 'Error', e.toString());
     }
   }
-
 }

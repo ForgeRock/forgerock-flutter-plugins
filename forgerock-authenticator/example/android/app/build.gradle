@@ -1,28 +1,28 @@
+plugins {
+    id 'com.android.application'
+    id 'org.jetbrains.kotlin.android'
+    id 'dev.flutter.flutter-gradle-plugin'
+    id 'com.google.gms.google-services'
+    id 'com.google.firebase.crashlytics'
+}
+
 def localProperties = new Properties()
-def localPropertiesFile = rootProject.file('local.properties')
+def localPropertiesFile = rootProject.file("local.properties")
 if (localPropertiesFile.exists()) {
-    localPropertiesFile.withReader('UTF-8') { reader ->
+    localPropertiesFile.withReader("UTF-8") { reader ->
         localProperties.load(reader)
     }
 }
 
-def flutterRoot = localProperties.getProperty('flutter.sdk')
-if (flutterRoot == null) {
-    throw new GradleException("Flutter SDK not found. Define location with flutter.sdk in the local.properties file.")
-}
-
-def flutterVersionCode = localProperties.getProperty('flutter.versionCode')
+def flutterVersionCode = localProperties.getProperty("flutter.versionCode")
 if (flutterVersionCode == null) {
-    flutterVersionCode = '1'
+    flutterVersionCode = "1"
 }
 
-def flutterVersionName = localProperties.getProperty('flutter.versionName')
+def flutterVersionName = localProperties.getProperty("flutter.versionName")
 if (flutterVersionName == null) {
-    flutterVersionName = '1.0'
+    flutterVersionName = "1.0"
 }
-
-apply plugin: 'com.android.application'
-apply from: "$flutterRoot/packages/flutter_tools/gradle/flutter.gradle"
 
 // The keystore.properties holds configuration for the release keystore
 def keystorePropertiesFile = rootProject.file("key.properties")
@@ -34,12 +34,13 @@ if (keystorePropertiesFileExists) {
 }
 
 android {
-    compileSdkVersion 33
+    namespace "com.example.authenticator"
+    compileSdk flutter.compileSdkVersion
 
     defaultConfig {
         applicationId "com.example.authenticator"
-        minSdkVersion 23
-        targetSdkVersion 33
+        minSdk = flutter.minSdkVersion
+        targetSdk = flutter.targetSdkVersion
         versionCode flutterVersionCode.toInteger()
         versionName flutterVersionName
 
@@ -60,16 +61,29 @@ android {
     buildTypes {
         debug {
             signingConfig signingConfigs.debug
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
         release {
             if (keystorePropertiesFileExists) {
                 signingConfig signingConfigs.release
             }
+            minifyEnabled true
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
 
-    lintOptions {
-        abortOnError false
+    lint {
+        abortOnError = false
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_11
+        targetCompatibility JavaVersion.VERSION_11
+    }
+
+    kotlinOptions {
+        jvmTarget = JavaVersion.VERSION_11.toString()
     }
 }
 
@@ -78,12 +92,9 @@ flutter {
 }
 
 dependencies {
-    testImplementation 'junit:junit:4.12'
-    androidTestImplementation 'androidx.test:runner:1.2.0'
-    androidTestImplementation 'androidx.test.espresso:espresso-core:3.2.0'
+    testImplementation 'junit:junit:4.13.2'
+    androidTestImplementation 'androidx.test:runner:1.5.2'
+    androidTestImplementation 'androidx.test.espresso:espresso-core:3.5.1'
 
     implementation 'com.google.firebase:firebase-messaging:23.1.1'
 }
-
-apply plugin: 'com.google.gms.google-services'
-apply plugin: 'com.google.firebase.crashlytics'

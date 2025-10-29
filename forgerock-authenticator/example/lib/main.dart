@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 ForgeRock. All rights reserved.
+ * Copyright (c) 2022-2025 ForgeRock. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
@@ -15,25 +15,26 @@ Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   // initialize SDK
-  AuthenticatorProvider.initialize();
+  await AuthenticatorProvider.initialize();
 
-  runApp(AuthenticatorApp());
+  runApp(const AuthenticatorApp());
 }
 
 class AuthenticatorApp extends StatelessWidget {
+  const AuthenticatorApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
         ChangeNotifierProvider<AuthenticatorProvider>(
-            create: (_) => AuthenticatorProvider()..getAllAccounts()
+          create: (_) => AuthenticatorProvider()..getAllAccounts(),
         ),
       ],
       child: MaterialApp(
-        home: HomeScreen(),
+        debugShowCheckedModeBanner: false,
+        home: const HomeScreen(),
       ),
     );
   }
-
 }
