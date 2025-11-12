@@ -1,5 +1,5 @@
 //
-//  Copyright (c) 2022-2023 ForgeRock. All rights reserved.
+//  Copyright (c) 2022-2025 ForgeRock. All rights reserved.
 //
 //  This software may be modified and distributed under the terms
 //  of the MIT license. See the LICENSE file for details.
@@ -189,8 +189,7 @@ open class FRAClientWrapper {
         NSLog("Looking for:  \(messageId)")
         let notificationList = FRAClient.shared?.getAllNotifications()
         for notification in notificationList! {
-            let jsonDictionary = ConverterUtil.convertStringToDictionary(jsonString: notification.toJson()!)
-            let mId = jsonDictionary?["messageId"] as! String
+            let mId = notification.messageId
             if(mId == messageId) {
                 NSLog("Message found.")
                 return notification
@@ -216,6 +215,7 @@ open class FRAClientWrapper {
             NSLog("Message not processed yet.")
             pushNotification = FRAPushHandler.shared.application(application, didReceiveRemoteNotification: userInfo)
             if(pushNotification != nil){
+                // present notification
                 NSLog("PushNotification successfuly created: \(String(describing: pushNotification?.toJson()))")
                 self.updatePendingNotificationsCount()
                 return pushNotification

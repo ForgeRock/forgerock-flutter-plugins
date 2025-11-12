@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 ForgeRock. All rights reserved.
+ * Copyright (c) 2022-2025 ForgeRock. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
@@ -11,14 +11,20 @@ import 'account_box.dart';
 
 /// The [AccountListTile] widget contains details of the [Account].
 class AccountListTile extends StatelessWidget {
+  const AccountListTile({
+    super.key,
+    required this.leading,
+    required this.title,
+    required this.subtitle,
+    this.trailing,
+    required this.child,
+  });
 
   final Widget leading;
   final String title;
   final String subtitle;
-  final Widget trailing;
+  final Widget? trailing;
   final Widget child;
-
-  const AccountListTile({Key key, this.leading, this.title, this.subtitle, this.trailing, this.child}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -34,7 +40,7 @@ class AccountListTile extends StatelessWidget {
                   alignment: Alignment.topCenter,
                   width: 80,
                   height: 50,
-                  padding: EdgeInsets.symmetric(horizontal: 5.0),
+                  padding: const EdgeInsets.symmetric(horizontal: 5.0),
                   child: leading
                 ),
               ],
@@ -47,14 +53,14 @@ class AccountListTile extends StatelessWidget {
                   padding: const EdgeInsets.fromLTRB(5, 0, 0, 0),
                   child: Text(
                     title,
-                    style: TextStyle(fontSize: 20),
+                    style: const TextStyle(fontSize: 20),
                   )
                 ),
                 Container(
                   padding: const EdgeInsets.fromLTRB(5, 0, 0, 0),
                   child: Text(
                     subtitle,
-                    style: TextStyle(fontSize: 17),
+                    style: const TextStyle(fontSize: 17),
                     overflow: TextOverflow.ellipsis,
                     maxLines: 1,
                     softWrap: false,
@@ -62,7 +68,7 @@ class AccountListTile extends StatelessWidget {
                 ),
               ],
             )),
-            trailing,
+            trailing ?? const SizedBox.shrink(),
           ]
         ),
         Row(

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 ForgeRock. All rights reserved.
+ * Copyright (c) 2022-2025 ForgeRock. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
@@ -17,21 +17,28 @@ import 'delete_account_dialog.dart';
 /// The [AccountCard] widget reprentes an [Account] registered with the SDK. This
 /// sample does not cover an Account with both OATH and PUSH mechanisms.
 class AccountCard extends StatelessWidget {
-  final Key key;
+  const AccountCard({
+    super.key,
+    required this.account,
+    required this.edit,
+  });
+
   final Account account;
   final bool edit;
 
-  AccountCard(this.key, this.account, this.edit);
-
   @override
   Widget build(BuildContext context) {
+    final String issuer =
+        account.getIssuer() ?? account.issuer ?? 'Unknown issuer';
+    final String accountName =
+        account.getAccountName() ?? account.accountName ?? 'Account';
     return AccountListTile(
       leading: AccountLogo(
-                  imageURL: account.imageURL,
-                  textFallback: account.issuer,
+        imageURL: account.imageURL,
+        textFallback: issuer,
                 ),
-      title: account.issuer,
-      subtitle: account.accountName,
+      title: issuer,
+      subtitle: accountName,
       trailing: edit ? _deleteButton(context) : _emptyContainer(),
       child: edit ? _emptyContainer() : _accountDetail(),
     );
@@ -58,18 +65,20 @@ class AccountCard extends StatelessWidget {
   }
 
   Widget _emptyContainer() {
-    return Container(height: 0, width: 0,);
+    return const SizedBox.shrink();
   }
 
   Widget _accountDetail() {
-    if (account.lock) {
+    if (account.lock == true) {
       return SizedBox(
         width: 230,
-        child: Text('Your account is locked due the policy: ' + account.lockingPolicy,
+        child: Text(
+          'Your account is locked due the policy: ${account.lockingPolicy ?? 'Unknown'}',
           maxLines: 2,
           overflow: TextOverflow.ellipsis,
           textAlign: TextAlign.center,
-          style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold),
+          style:
+              const TextStyle(color: Colors.red, fontWeight: FontWeight.bold),
         ),
       );
     } else {
@@ -81,4 +90,3 @@ class AccountCard extends StatelessWidget {
   }
 
 }
-
