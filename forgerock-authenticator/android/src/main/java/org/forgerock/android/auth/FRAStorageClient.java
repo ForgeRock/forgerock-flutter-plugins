@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 ForgeRock. All rights reserved.
+ * Copyright (c) 2022-2026 ForgeRock. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
@@ -10,17 +10,14 @@ package org.forgerock.android.auth;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.util.Log;
 
 import androidx.annotation.NonNull;
 
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.TimeZone;
 
 /**
  * Data Access Object which implements StorageClient interface and uses SecureSharedPreferences from
@@ -35,17 +32,23 @@ class FRAStorageClient implements StorageClient {
     private static final String FORGEROCK_SHARED_PREFERENCES_DATA_ACCOUNT = "com.forgerock.authenticator.DATA.ACCOUNT";
     private static final String FORGEROCK_SHARED_PREFERENCES_DATA_MECHANISM = "com.forgerock.authenticator.DATA.MECHANISM";
     private static final String FORGEROCK_SHARED_PREFERENCES_DATA_NOTIFICATIONS = "com.forgerock.authenticator.DATA.NOTIFICATIONS";
+    private static final String FORGEROCK_SHARED_PREFERENCES_DATA_DEVICE_TOKEN = "com.forgerock.android.authenticator.DATA.DEVICE_TOKEN";
     private static final String FORGEROCK_SHARED_PREFERENCES_DATA_BACKUP = "com.forgerock.authenticator.DATA.BACKUP";
+
+    // Device Token key
+    private static final String DEVICE_TOKEN_ID = "deviceToken";
 
     //The SharedPreferences to store the data
     private final SharedPreferences accountData;
     private final SharedPreferences mechanismData;
     private final SharedPreferences notificationData;
+    private final SharedPreferences deviceTokenData;
     private final SharedPreferences backupData;
 
     private final HashMap<String, Account> accountMap;
     private final HashMap<String, Mechanism> mechanismMap;
     private final HashMap<String, PushNotification> notificationMap;
+    private final HashMap<String, PushDeviceToken> deviceTokenMap;
 
     private static final String TAG = DefaultStorageClient.class.getSimpleName();
     private static final int NOTIFICATIONS_MAX_SIZE = 20;
@@ -62,12 +65,15 @@ class FRAStorageClient implements StorageClient {
                 FORGEROCK_SHARED_PREFERENCES_DATA_MECHANISM, FORGEROCK_SHARED_PREFERENCES_KEYS);
         this.notificationData = new SecuredSharedPreferences(context,
                 FORGEROCK_SHARED_PREFERENCES_DATA_NOTIFICATIONS, FORGEROCK_SHARED_PREFERENCES_KEYS);
+        this.deviceTokenData = new SecuredSharedPreferences(context,
+                FORGEROCK_SHARED_PREFERENCES_DATA_DEVICE_TOKEN, FORGEROCK_SHARED_PREFERENCES_KEYS);
         this.backupData = new SecuredSharedPreferences(context,
                 FORGEROCK_SHARED_PREFERENCES_DATA_BACKUP, FORGEROCK_SHARED_PREFERENCES_KEYS);
 
         this.accountMap = new HashMap<>();
         this.mechanismMap = new HashMap<>();
         this.notificationMap = new HashMap<>();
+        this.deviceTokenMap = new HashMap<>();
     }
 
     @Override
@@ -325,7 +331,7 @@ class FRAStorageClient implements StorageClient {
     public void removeAllNotifications() {
         notificationData.edit()
                 .clear()
-                .commit();
+                .apply();
         notificationMap.clear();
     }
 
@@ -340,6 +346,45 @@ class FRAStorageClient implements StorageClient {
         } else {
             String json = notificationData.getString(notificationId, null);
             return PushNotification.deserialize(json);
+        }
+    }
+
+    @Override
+    public PushNotification getNotificationByMessageId(String s) {
+        if(this.notificationMap.isEmpty()) {
+            this.getAllNotifications();
+        }
+
+        for (PushNotification pushNotification : this.notificationMap.values()) {
+            if (pushNotification.getMessageId().equals(s)) {
+                return pushNotification;
+            }
+        }
+
+        return null;
+    }
+
+    @Override
+    public boolean setPushDeviceToken(PushDeviceToken pushDeviceToken) {
+        String pushDeviceTokenJson = pushDeviceToken.serialize();
+        boolean success = deviceTokenData.edit()
+                .putString(DEVICE_TOKEN_ID, pushDeviceTokenJson)
+                .commit();
+
+        if(success) {
+            this.deviceTokenMap.put(DEVICE_TOKEN_ID, pushDeviceToken);
+        }
+
+        return success;
+    }
+
+    @Override
+    public PushDeviceToken getPushDeviceToken() {
+        if(this.deviceTokenMap.containsKey(DEVICE_TOKEN_ID)) {
+            return this.deviceTokenMap.get(DEVICE_TOKEN_ID);
+        } else {
+            String json = deviceTokenData.getString(DEVICE_TOKEN_ID, null);
+            return PushDeviceToken.deserialize(json);
         }
     }
 
@@ -366,7 +411,8 @@ class FRAStorageClient implements StorageClient {
     public boolean isEmpty() {
         return accountData.getAll().isEmpty() &&
                 mechanismData.getAll().isEmpty() &&
-                notificationData.getAll().isEmpty();
+                notificationData.getAll().isEmpty() &&
+                deviceTokenData.getAll().isEmpty();
     }
 
     /**

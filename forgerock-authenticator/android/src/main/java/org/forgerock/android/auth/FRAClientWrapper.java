@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 ForgeRock. All rights reserved.
+ * Copyright (c) 2022-2026 ForgeRock. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
@@ -426,6 +426,25 @@ public class FRAClientWrapper {
         } else {
             denyMessage(pushNotification, flutterResult);
         }
+    }
+
+    protected void updateDeviceToken(String newToken) {
+        if (fraClient == null) {
+            Log.w(TAG, "FRAClient is not initialized yet. Device token update will be skipped.");
+            return;
+        }
+
+        fraClient.updateDeviceToken(newToken, new FRAListener<Void>() {
+            @Override
+            public void onSuccess(Void result) {
+                Log.d(TAG, "Device token updated successfully.");
+            }
+
+            @Override
+            public void onException(Exception e) {
+                Log.e(TAG, "Error updating device token.", e);
+            }
+        });
     }
 
     private void denyMessage(PushNotification pushNotification, Result flutterResult) {

@@ -1,5 +1,5 @@
 //
-//  Copyright (c) 2022-2025 ForgeRock. All rights reserved.
+//  Copyright (c) 2022-2026 ForgeRock. All rights reserved.
 //
 //  This software may be modified and distributed under the terms
 //  of the MIT license. See the LICENSE file for details.
@@ -20,6 +20,7 @@ open class FRAClientWrapper {
     func startSDK(result: FlutterResult?) {
         do {
             if(FRAClient.shared == nil) {
+                FRALog.setLogLevel(.all)
                 try FRAClient.setStorage(storage: storageClient)
                 try FRAClient.setPolicyEvaluator(policyEvaluator: policyEvaluator)
                 FRAClient.start()
