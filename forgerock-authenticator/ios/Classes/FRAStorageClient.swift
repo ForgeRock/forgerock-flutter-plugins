@@ -166,18 +166,13 @@ struct FRAStorageClient: StorageClient {
     }
         
     @discardableResult func setNotification(notification: PushNotification) -> Bool {
-        if #available(iOS 11.0, *) {
-            do {
-                let notificationData = try NSKeyedArchiver.archivedData(withRootObject: notification, requiringSecureCoding: true)
-                return self.notificationStorage.set(notificationData, key: notification.identifier)
-            }
-            catch {
-                FRALog.e("Failed to serialize PushNotification object: \(error.localizedDescription)")
-                return false
-            }
-        } else {
-            let notificationData = NSKeyedArchiver.archivedData(withRootObject: notification)
+        do {
+            let notificationData = try NSKeyedArchiver.archivedData(withRootObject: notification, requiringSecureCoding: true)
             return self.notificationStorage.set(notificationData, key: notification.identifier)
+        }
+        catch {
+            FRALog.e("Failed to serialize PushNotification object: \(error.localizedDescription)")
+            return false
         }
     }
         
@@ -257,38 +252,24 @@ struct FRAStorageClient: StorageClient {
     }
     
     @discardableResult func setPushDeviceToken(pushDeviceToken: PushDeviceToken) -> Bool {
-        if #available(iOS 11.0, *) {
-            do {
-                let pushDeviceTokenData = try NSKeyedArchiver.archivedData(withRootObject: pushDeviceToken, requiringSecureCoding: true)
-                return self.pushDeviceTokenStorage.set(pushDeviceTokenData, key: deviceTokenIdentifier)
-            }
-            catch {
-                FRALog.e("Failed to serialize PushDeviceToken object: \(error.localizedDescription)")
-                return false
-            }
-        } else {
-            let pushDeviceTokenData = NSKeyedArchiver.archivedData(withRootObject: pushDeviceToken)
+        do {
+            let pushDeviceTokenData = try NSKeyedArchiver.archivedData(withRootObject: pushDeviceToken, requiringSecureCoding: true)
             return self.pushDeviceTokenStorage.set(pushDeviceTokenData, key: deviceTokenIdentifier)
+        }
+        catch {
+            FRALog.e("Failed to serialize PushDeviceToken object: \(error.localizedDescription)")
+            return false
         }
     }
     
     
     func getPushDeviceToken() -> PushDeviceToken? {
         guard let pushDeviceTokenData = self.pushDeviceTokenStorage.getData(deviceTokenIdentifier) else { return nil }
-        if #available(iOS 11.0, *) {
-            if let pushDeviceToken = try? NSKeyedUnarchiver.unarchivedObject(ofClass: PushDeviceToken.self, from: pushDeviceTokenData) {
-                return pushDeviceToken
-            }
-            else {
-                return nil
-            }
-        } else {
-            if let pushDeviceToken = NSKeyedUnarchiver.unarchiveObject(with: pushDeviceTokenData) as? PushDeviceToken {
-                return pushDeviceToken
-            }
-            else {
-                return nil
-            }
+        if let pushDeviceToken = try? NSKeyedUnarchiver.unarchivedObject(ofClass: PushDeviceToken.self, from: pushDeviceTokenData) {
+            return pushDeviceToken
+        }
+        else {
+            return nil
         }
     }
     
