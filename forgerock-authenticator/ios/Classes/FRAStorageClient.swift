@@ -279,7 +279,10 @@ struct FRAStorageClient: StorageClient {
     }
     
     @discardableResult func isEmpty() -> Bool {
-        return self.notificationStorage.allItems()?.count == 0 && self.mechanismStorage.allItems()?.count == 0 && self.accountStorage.allItems()?.count == 0
+        return self.notificationStorage.allItems()?.count == 0 &&
+        self.mechanismStorage.allItems()?.count == 0 &&
+        self.accountStorage.allItems()?.count == 0  &&
+        self.pushDeviceTokenStorage.allItems()?.count == 0
     }
     
     func removeAllData() {
